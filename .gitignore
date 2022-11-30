@@ -1,0 +1,19 @@
+*.class
+*.log
+
+# sbt specific
+.bsp
+dist/*
+target/
+project/boot/
+project/plugins/project/
+project/targtet/
+
+bundle_*
+bundle-filename
+env
+
+# Idea specific
+.idea
+.idea_modules
+*.iml
