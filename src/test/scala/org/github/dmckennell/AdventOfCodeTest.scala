@@ -22,22 +22,19 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
     "sample" in {
       linesFor(Day.`1`, Part.sample).use { calories =>
-        val input = calories ++ List("")
-        IO.println(getHighestTotal(input))
+        IO.println(getHighestTotal(calories))
       }
     }
 
     "part a" in {
       linesFor(Day.`1`, Part.real).use { calories =>
-        val input = calories ++ List("")
-        IO.println(getHighestTotal(input))
+        IO.println(getHighestTotal(calories))
       }
     }
 
     "part b" in {
       linesFor(Day.`1`, Part.real).use { calories =>
-        val input = calories ++ List("")
-        val (_, highest3) = input.foldLeft((0, List(0, 0, 0))) { case ((acc, highest3), current) =>
+        val (_, highest3) = calories.foldLeft((0, List(0, 0, 0))) { case ((acc, highest3), current) =>
           if (current == "") {
             val (lowest, idx) = highest3.zipWithIndex.minBy { case (value, _) => value }
             if (acc > lowest) (0, highest3.updated(idx, acc)) else (0, highest3)
