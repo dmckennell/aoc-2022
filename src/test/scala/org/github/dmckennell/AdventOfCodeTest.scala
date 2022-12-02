@@ -52,10 +52,18 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
   "Day 02" - {
 
-    sealed trait Choice
-    case object Rock     extends Choice
-    case object Paper    extends Choice
-    case object Scissors extends Choice
+    sealed trait Choice {
+      val value: Int
+    }
+    case object Rock extends Choice {
+      override val value: Int = 1
+    }
+    case object Paper extends Choice {
+      override val value: Int = 2
+    }
+    case object Scissors extends Choice {
+      override val value: Int = 3
+    }
 
     sealed trait Outcome {
       val score: Int
@@ -77,13 +85,6 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     )
     val losesAgainst = winsAgainst.map(_.swap)
 
-    def determineChoiceScore(choice: Choice): Int =
-      choice match {
-        case Rock     => 1
-        case Paper    => 2
-        case Scissors => 3
-      }
-
     object PartA {
 
       def determineChoice(letter: Char): Choice =
@@ -96,8 +97,8 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
       def determineMyOutcome(me: Choice, opponent: Choice): Outcome = {
         (me, opponent) match {
           case (_, _) if winsAgainst(opponent) == me => Win
-          case (_, _) if me == opponent                => Draw
-          case _                                       => Loss
+          case (_, _) if me == opponent              => Draw
+          case _                                     => Loss
         }
       }
 
@@ -105,9 +106,8 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         lines.map { game =>
           val Array(opponent, me)        = game.split(" ").take(2)
           val (opponentChoice, myChoice) = (determineChoice(opponent.charAt(0)), determineChoice(me.charAt(0)))
-          val choiceScore                = determineChoiceScore(myChoice)
           val roundScore                 = determineMyOutcome(myChoice, opponentChoice).score
-          roundScore + choiceScore
+          roundScore + myChoice.value
         }.sum
     }
 
@@ -139,9 +139,8 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         val outcome                 = determineOutcome(result.charAt(0))
         val myChoice                = determineMyChoice(outcome, opponentChoice)
 
-        val choiceScore = determineChoiceScore(myChoice)
-        val roundScore  = outcome.score
-        roundScore + choiceScore
+        val roundScore = outcome.score
+        roundScore + myChoice.value
       }.sum
     }
 
