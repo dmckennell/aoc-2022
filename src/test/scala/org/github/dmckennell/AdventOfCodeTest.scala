@@ -21,19 +21,22 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     }
 
     "sample" in {
-      linesFor(Day.`1`, Part.sample).use { calories =>
+      linesFor(Day.`1`, Part.sample).use { lines =>
+        val calories = lines ++ List("")
         IO.println(getHighestTotal(calories))
       }
     }
 
     "part a" in {
-      linesFor(Day.`1`, Part.real).use { calories =>
+      linesFor(Day.`1`, Part.real).use { lines =>
+        val calories = lines ++ List("")
         IO.println(getHighestTotal(calories))
       }
     }
 
     "part b" in {
-      linesFor(Day.`1`, Part.real).use { calories =>
+      linesFor(Day.`1`, Part.real).use { lines =>
+        val calories = lines ++ List("")
         val (_, highest3) = calories.foldLeft((0, List(0, 0, 0))) { case ((acc, highest3), current) =>
           if (current == "") {
             val (lowest, idx) = highest3.zipWithIndex.minBy { case (value, _) => value }
@@ -43,6 +46,134 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
           }
         }
         IO.println(highest3.sum)
+      }
+    }
+  }
+
+  "Day 02" - {
+
+    sealed trait Choice
+    case object Rock     extends Choice
+    case object Paper    extends Choice
+    case object Scissors extends Choice
+
+    sealed trait Outcome {
+      val score: Int
+    }
+    case object Win extends Outcome {
+      override val score: Int = 6
+    }
+    case object Draw extends Outcome {
+      override val score: Int = 3
+    }
+    case object Loss extends Outcome {
+      override val score: Int = 0
+    }
+
+    def determineChoiceScore(choice: Choice): Int =
+      choice match {
+        case Rock     => 1
+        case Paper    => 2
+        case Scissors => 3
+      }
+
+    object PartA {
+
+      def determineChoice(letter: Char): Choice =
+        letter match {
+          case 'X' | 'A' => Rock
+          case 'Y' | 'B' => Paper
+          case 'Z' | 'C' => Scissors
+        }
+
+      def determineMyOutcome(me: Choice, opponent: Choice): Outcome =
+        (me, opponent) match {
+          case (Rock, Scissors)         => Win
+          case (Scissors, Paper)        => Win
+          case (Paper, Rock)            => Win
+          case (_, _) if me == opponent => Draw
+          case _                        => Loss
+        }
+
+      def solve(lines: List[String]): Int =
+        lines.map { game =>
+          val List(opponent, me)         = game.split(" ").take(2).toList
+          val (opponentChoice, myChoice) = (determineChoice(opponent.charAt(0)), determineChoice(me.charAt(0)))
+          val choiceScore                = determineChoiceScore(myChoice)
+          val roundScore                 = determineMyOutcome(myChoice, opponentChoice).score
+          roundScore + choiceScore
+        }.sum
+    }
+
+    object PartB {
+      def determineOpponentChoice(letter: Char): Choice =
+        letter match {
+          case 'A' => Rock
+          case 'B' => Paper
+          case 'C' => Scissors
+        }
+
+      def determineOutCome(letter: Char): Outcome =
+        letter match {
+          case 'X' => Loss
+          case 'Y' => Draw
+          case 'Z' => Win
+        }
+
+      def findWinningChoice(opponent: Choice): Choice =
+        opponent match {
+          case Rock     => Paper
+          case Paper    => Scissors
+          case Scissors => Rock
+        }
+
+      def findLosingChoice(opponent: Choice): Choice =
+        opponent match {
+          case Rock     => Scissors
+          case Paper    => Rock
+          case Scissors => Paper
+        }
+
+      def determineMyChoice(outcome: Outcome, opponent: Choice): Choice =
+        outcome match {
+          case Win  => findWinningChoice(opponent)
+          case Draw => opponent
+          case Loss => findLosingChoice(opponent)
+        }
+
+      def solve(lines: List[String]): Int = lines.map { game =>
+        val List(opponent, result) = game.split(" ").take(2).toList
+        val opponentChoice         = determineOpponentChoice(opponent.charAt(0))
+        val outcome                = determineOutCome(result.charAt(0))
+        val myChoice               = determineMyChoice(outcome, opponentChoice)
+
+        val choiceScore = determineChoiceScore(myChoice)
+        val roundScore  = outcome.score
+        roundScore + choiceScore
+      }.sum
+    }
+
+    "sample part a" in {
+      linesFor(Day.`2`, Part.sample).use { lines =>
+        IO.println(PartA.solve(lines))
+      }
+    }
+
+    "part a" in {
+      linesFor(Day.`2`, Part.real).use { lines =>
+        IO.println(PartA.solve(lines))
+      }
+    }
+
+    "sample part b" in {
+      linesFor(Day.`2`, Part.sample).use { lines =>
+        IO.println(PartB.solve(lines))
+      }
+    }
+
+    "part b" in {
+      linesFor(Day.`2`, Part.real).use { lines =>
+        IO.println(PartB.solve(lines))
       }
     }
   }
