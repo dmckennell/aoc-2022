@@ -12,7 +12,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: corretto
-          java-version: 17.0.4
+          java-version: 17
           cache: sbt
       - name: Build and Test
         run: sbt -v +test
