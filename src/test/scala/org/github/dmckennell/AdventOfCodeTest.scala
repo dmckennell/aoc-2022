@@ -70,6 +70,13 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
       override val score: Int = 0
     }
 
+    val winsAgainst: Map[Choice, Choice] = Map(
+      Rock     -> Paper,
+      Scissors -> Rock,
+      Paper    -> Scissors
+    )
+    val losesAgainst = winsAgainst.map(_.swap)
+
     def determineChoiceScore(choice: Choice): Int =
       choice match {
         case Rock     => 1
@@ -86,14 +93,13 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
           case 'Z' | 'C' => Scissors
         }
 
-      def determineMyOutcome(me: Choice, opponent: Choice): Outcome =
+      def determineMyOutcome(me: Choice, opponent: Choice): Outcome = {
         (me, opponent) match {
-          case (Rock, Scissors)         => Win
-          case (Scissors, Paper)        => Win
-          case (Paper, Rock)            => Win
-          case (_, _) if me == opponent => Draw
-          case _                        => Loss
+          case (_, _) if winsAgainst(opponent) == me => Win
+          case (_, _) if me == opponent                => Draw
+          case _                                       => Loss
         }
+      }
 
       def solve(lines: List[String]): Int =
         lines.map { game =>
@@ -120,25 +126,11 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
           case 'Z' => Win
         }
 
-      def findWinningChoice(opponent: Choice): Choice =
-        opponent match {
-          case Rock     => Paper
-          case Paper    => Scissors
-          case Scissors => Rock
-        }
-
-      def findLosingChoice(opponent: Choice): Choice =
-        opponent match {
-          case Rock     => Scissors
-          case Paper    => Rock
-          case Scissors => Paper
-        }
-
       def determineMyChoice(outcome: Outcome, opponent: Choice): Choice =
         outcome match {
-          case Win  => findWinningChoice(opponent)
+          case Win  => winsAgainst(opponent)
           case Draw => opponent
-          case Loss => findLosingChoice(opponent)
+          case Loss => losesAgainst(opponent)
         }
 
       def solve(lines: List[String]): Int = lines.map { game =>
