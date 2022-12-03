@@ -21,6 +21,7 @@ object Ops {
     val values = findValues
     case object `1` extends Day
     case object `2` extends Day
+    case object `3` extends Day
   }
 
   def linesFor(day: Day, part: Part): Resource[IO, List[String]] = {

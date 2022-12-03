@@ -6,6 +6,8 @@ import org.github.dmckennell.Ops._
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 
+import scala.collection.immutable.HashSet
+
 class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
   "Day 01 " - {
@@ -165,6 +167,85 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     "part b" in {
       linesFor(Day.`2`, Part.real).use { lines =>
         IO.println(PartB.solve(lines))
+      }
+    }
+  }
+
+  "Day 03" - {
+    val scores    = 1 to 52
+    val lowerCase = 'a' to 'z'
+    val upperCase = lowerCase.map(_.toUpper)
+    val letters   = lowerCase ++ upperCase
+
+    val letterScores = letters.zip(scores).toMap
+
+    object PartA {
+      def splitCompartments(rucksack: String): (String, String) = {
+        val (first, second) = rucksack.splitAt(rucksack.length / 2)
+        (first.distinct, second.distinct)
+      }
+
+      def findDuplicate(firstCompartment: String, secondCompartment: String): Option[Char] =
+        firstCompartment.collectFirst {
+          case item if secondCompartment.contains(item) => item
+        }
+
+      def solve(rucksacks: List[String]): Int =
+        rucksacks.map(splitCompartments).map { case (first, second) =>
+          findDuplicate(first, second).fold(0)(letterScores)
+        }.sum
+    }
+
+    object PartB {
+      def groupElves(rucksacks: List[String]): List[List[String]] =
+        rucksacks.grouped(3).toList
+
+      def findTriplicate(first: HashSet[Char], second: HashSet[Char], third: HashSet[Char]): Option[Char] =
+        first.collectFirst {
+          case item if second.contains(item) && third.contains(item) => item
+        }
+
+      def solve(rucksacks: List[String]): Int =
+        groupElves(rucksacks).map { case List(first, second, third) =>
+          findTriplicate(HashSet(first: _*), HashSet(second: _*), HashSet(third: _*)).fold(0)(letterScores)
+        }.sum
+    }
+
+    def timed(f: => IO[Unit]): IO[Unit] = {
+      for {
+        start  <- IO(System.nanoTime())
+        result <- f
+        finish <- IO(System.nanoTime())
+      } yield {
+        val timeTakenMs = BigDecimal((finish - start) / Math.pow(10, 6)).setScale(2, BigDecimal.RoundingMode.UP)
+        println(s"took ${timeTakenMs} ms")
+        result
+      }
+    }
+
+    "sample part a" in {
+      linesFor(Day.`3`, Part.sample).use { lines =>
+        IO.println(PartA.solve(lines))
+      }
+    }
+
+    "part a" in {
+      linesFor(Day.`3`, Part.real).use { lines =>
+        IO.println(PartA.solve(lines))
+      }
+    }
+
+    "sample part b" in {
+      linesFor(Day.`3`, Part.sample).use { lines =>
+        IO.println(PartB.solve(lines))
+      }
+    }
+
+    "part b" in {
+      linesFor(Day.`3`, Part.real).use { lines =>
+        timed {
+          IO.println(PartB.solve(lines))
+        }
       }
     }
   }
