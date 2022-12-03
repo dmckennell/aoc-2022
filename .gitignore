@@ -7,11 +7,19 @@ dist/*
 target/
 project/boot/
 project/plugins/project/
-project/targtet/
+project/target/
 
 bundle_*
 bundle-filename
 env
+
+# metals, vscode etc
+project/project/
+project/.bloop/
+project/metals.sbt
+.metals/
+.vscode
+.bloop/
 
 # Idea specific
 .idea

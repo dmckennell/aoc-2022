@@ -1,14 +1,14 @@
 package org.github.dmckennell
 
-import cats.effect._
+import cats.effect.*
 import cats.effect.testing.scalatest.AsyncIOSpec
-import org.github.dmckennell.Ops._
+import org.github.dmckennell.Ops.*
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 
 class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
-  "Day 01 " - {
+  "Day 01" - {
     def getHighestTotal(input: List[String]): Int = {
       val (_, highest) = input.foldLeft((0, 0)) { case ((acc, highest), current) =>
         if (current == "") {
@@ -21,29 +21,28 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     }
 
     "sample" in {
-      linesFor(Day.`1`, Part.sample).use { lines =>
+      linesFor(Day.`1`, Input.sample, Part.a).use { lines =>
         val calories = lines ++ List("")
         IO.println(getHighestTotal(calories))
       }
     }
 
     "part a" in {
-      linesFor(Day.`1`, Part.real).use { lines =>
+      linesFor(Day.`1`, Input.real, Part.a).use { lines =>
         val calories = lines ++ List("")
         IO.println(getHighestTotal(calories))
       }
     }
 
     "part b" in {
-      linesFor(Day.`1`, Part.real).use { lines =>
+      linesFor(Day.`1`, Input.real, Part.b).use { lines =>
         val calories = lines ++ List("")
         val (_, highest3) = calories.foldLeft((0, List(0, 0, 0))) { case ((acc, highest3), current) =>
-          if (current == "") {
+          if (current == "")
             val (lowest, idx) = highest3.zipWithIndex.minBy { case (value, _) => value }
             if (acc > lowest) (0, highest3.updated(idx, acc)) else (0, highest3)
-          } else {
+          else
             (acc + current.toInt, highest3)
-          }
         }
         IO.println(highest3.sum)
       }
@@ -52,36 +51,20 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
   "Day 02" - {
 
-    sealed trait Choice {
-      val value: Int
-    }
-    case object Rock extends Choice {
-      override val value: Int = 1
-    }
-    case object Paper extends Choice {
-      override val value: Int = 2
-    }
-    case object Scissors extends Choice {
-      override val value: Int = 3
-    }
+    enum Choice(val value: Int):
+      case Rock     extends Choice(1)
+      case Paper    extends Choice(2)
+      case Scissors extends Choice(3)
 
-    sealed trait Outcome {
-      val score: Int
-    }
-    case object Win extends Outcome {
-      override val score: Int = 6
-    }
-    case object Draw extends Outcome {
-      override val score: Int = 3
-    }
-    case object Loss extends Outcome {
-      override val score: Int = 0
-    }
+    enum Outcome(val score: Int):
+      case Win  extends Outcome(6)
+      case Draw extends Outcome(3)
+      case Loss extends Outcome(0)
 
     val winsAgainst: Map[Choice, Choice] = Map(
-      Rock     -> Paper,
-      Scissors -> Rock,
-      Paper    -> Scissors
+      Choice.Rock     -> Choice.Paper,
+      Choice.Scissors -> Choice.Rock,
+      Choice.Paper    -> Choice.Scissors
     )
     val losesAgainst = winsAgainst.map(_.swap)
 
@@ -89,18 +72,17 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
       def determineChoice(letter: Char): Choice =
         letter match {
-          case 'X' | 'A' => Rock
-          case 'Y' | 'B' => Paper
-          case 'Z' | 'C' => Scissors
+          case 'X' | 'A' => Choice.Rock
+          case 'Y' | 'B' => Choice.Paper
+          case 'Z' | 'C' => Choice.Scissors
         }
 
-      def determineMyOutcome(me: Choice, opponent: Choice): Outcome = {
+      def determineMyOutcome(me: Choice, opponent: Choice): Outcome =
         (me, opponent) match {
-          case (_, _) if winsAgainst(opponent) == me => Win
-          case (_, _) if me == opponent              => Draw
-          case _                                     => Loss
+          case (_, _) if winsAgainst(opponent) == me => Outcome.Win
+          case (_, _) if me == opponent              => Outcome.Draw
+          case _                                     => Outcome.Loss
         }
-      }
 
       def solve(lines: List[String]): Int =
         lines.map { game =>
@@ -114,23 +96,23 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     object PartB {
       def determineOpponentChoice(letter: Char): Choice =
         letter match {
-          case 'A' => Rock
-          case 'B' => Paper
-          case 'C' => Scissors
+          case 'A' => Choice.Rock
+          case 'B' => Choice.Paper
+          case 'C' => Choice.Scissors
         }
 
       def determineOutcome(letter: Char): Outcome =
         letter match {
-          case 'X' => Loss
-          case 'Y' => Draw
-          case 'Z' => Win
+          case 'X' => Outcome.Loss
+          case 'Y' => Outcome.Draw
+          case 'Z' => Outcome.Win
         }
 
       def determineMyChoice(outcome: Outcome, opponent: Choice): Choice =
         outcome match {
-          case Win  => winsAgainst(opponent)
-          case Draw => opponent
-          case Loss => losesAgainst(opponent)
+          case Outcome.Win  => winsAgainst(opponent)
+          case Outcome.Draw => opponent
+          case Outcome.Loss => losesAgainst(opponent)
         }
 
       def solve(lines: List[String]): Int = lines.map { game =>
@@ -145,25 +127,25 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     }
 
     "sample part a" in {
-      linesFor(Day.`2`, Part.sample).use { lines =>
+      linesFor(Day.`2`, Input.sample, Part.a).use { lines =>
         IO.println(PartA.solve(lines))
       }
     }
 
     "part a" in {
-      linesFor(Day.`2`, Part.real).use { lines =>
+      linesFor(Day.`2`, Input.real, Part.a).use { lines =>
         IO.println(PartA.solve(lines))
       }
     }
 
     "sample part b" in {
-      linesFor(Day.`2`, Part.sample).use { lines =>
+      linesFor(Day.`2`, Input.sample, Part.b).use { lines =>
         IO.println(PartB.solve(lines))
       }
     }
 
     "part b" in {
-      linesFor(Day.`2`, Part.real).use { lines =>
+      linesFor(Day.`2`, Input.real, Part.b).use { lines =>
         IO.println(PartB.solve(lines))
       }
     }
@@ -211,25 +193,25 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     }
 
     "sample part a" in {
-      linesFor(Day.`3`, Part.sample).use { lines =>
+      linesFor(Day.`3`, Input.sample, Part.a).use { lines =>
         IO.println(PartA.solve(lines))
       }
     }
 
     "part a" in {
-      linesFor(Day.`3`, Part.real).use { lines =>
+      linesFor(Day.`3`, Input.real, Part.a).use { lines =>
         IO.println(PartA.solve(lines))
       }
     }
 
     "sample part b" in {
-      linesFor(Day.`3`, Part.sample).use { lines =>
+      linesFor(Day.`3`, Input.sample, Part.b).use { lines =>
         IO.println(PartB.solve(lines))
       }
     }
 
     "part b" in {
-      linesFor(Day.`3`, Part.real).use { lines =>
+      linesFor(Day.`3`, Input.real, Part.b).use { lines =>
         timed {
           IO.println(PartB.solve(lines))
         }
