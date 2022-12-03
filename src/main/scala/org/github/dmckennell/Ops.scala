@@ -32,8 +32,7 @@ object Ops:
       start  <- IO(System.nanoTime())
       result <- f
       finish <- IO(System.nanoTime())
-    yield {
+    yield
       val timeTakenMs = BigDecimal((finish - start) / Math.pow(10, 6)).setScale(2, BigDecimal.RoundingMode.UP)
       println(s"took $timeTakenMs ms")
       result
-    }

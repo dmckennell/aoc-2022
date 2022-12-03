@@ -88,8 +88,8 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         lines.map { game =>
           val Array(opponent, me)        = game.split(" ").take(2)
           val (opponentChoice, myChoice) = (determineChoice(opponent.charAt(0)), determineChoice(me.charAt(0)))
-          val roundScore                 = determineMyOutcome(myChoice, opponentChoice).score
-          roundScore + myChoice.value
+
+          determineMyOutcome(myChoice, opponentChoice).score + myChoice.value
         }.sum
     }
 
@@ -121,8 +121,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         val outcome                 = determineOutcome(result.charAt(0))
         val myChoice                = determineMyChoice(outcome, opponentChoice)
 
-        val roundScore = outcome.score
-        roundScore + myChoice.value
+        outcome.score + myChoice.value
       }.sum
     }
 
