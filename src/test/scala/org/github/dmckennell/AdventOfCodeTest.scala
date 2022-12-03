@@ -6,8 +6,6 @@ import org.github.dmckennell.Ops._
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.collection.immutable.HashSet
-
 class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
   "Day 01 " - {
@@ -206,8 +204,9 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         }
 
       def solve(rucksacks: List[String]): Int =
-        groupElves(rucksacks).map { case List(first, second, third) =>
-          findTriplicate(first, second, third).fold(0)(letterScores)
+        groupElves(rucksacks).map {
+          case List(first, second, third) => findTriplicate(first, second, third).fold(0)(letterScores)
+          case _                          => fail()
         }.sum
     }
 
