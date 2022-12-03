@@ -200,14 +200,14 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
       def groupElves(rucksacks: List[String]): List[List[String]] =
         rucksacks.grouped(3).toList
 
-      def findTriplicate(first: HashSet[Char], second: HashSet[Char], third: HashSet[Char]): Option[Char] =
+      def findTriplicate(first: String, second: String, third: String): Option[Char] =
         first.collectFirst {
           case item if second.contains(item) && third.contains(item) => item
         }
 
       def solve(rucksacks: List[String]): Int =
         groupElves(rucksacks).map { case List(first, second, third) =>
-          findTriplicate(HashSet(first: _*), HashSet(second: _*), HashSet(third: _*)).fold(0)(letterScores)
+          findTriplicate(first, second, third).fold(0)(letterScores)
         }.sum
     }
 
