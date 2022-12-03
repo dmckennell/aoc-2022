@@ -211,18 +211,6 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         }.sum
     }
 
-    def timed(f: => IO[Unit]): IO[Unit] = {
-      for {
-        start  <- IO(System.nanoTime())
-        result <- f
-        finish <- IO(System.nanoTime())
-      } yield {
-        val timeTakenMs = BigDecimal((finish - start) / Math.pow(10, 6)).setScale(2, BigDecimal.RoundingMode.UP)
-        println(s"took ${timeTakenMs} ms")
-        result
-      }
-    }
-
     "sample part a" in {
       linesFor(Day.`3`, Part.sample).use { lines =>
         IO.println(PartA.solve(lines))
