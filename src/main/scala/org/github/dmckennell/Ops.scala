@@ -18,13 +18,11 @@ object Ops:
   def linesFor(day: Day, input: Input, part: Part): Resource[IO, List[String]] =
     val source = Source.fromFile(s"./input/${day.toString}/${input.toString}.txt")
     Resource.make {
-      IO.println(s"Opening file for day ${day.toString} part ${part.toString} with ${input.toString} input") *> IO(
-        source.getLines().toList
-      )
+      IO.println(s"Opening file for day ${day.toString} part ${part.toString} with ${input.toString} input") *>
+        IO(source.getLines().toList)
     } { _ =>
-      IO.println(s"Closing file for day ${day.toString} part ${part.toString} with ${input.toString} input") *> IO(
-        source.close()
-      )
+      IO.println(s"Closing file for day ${day.toString} part ${part.toString} with ${input.toString} input") *>
+        IO(source.close())
     }
 
   def timed(f: => IO[Unit]): IO[Unit] =

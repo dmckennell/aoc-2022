@@ -1,6 +1,6 @@
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
-ThisBuild / scalaVersion := "3.2.1"
+ThisBuild / scalaVersion := "3.3.0-RC1-bin-20221201-716d93d-NIGHTLY"
 
 lazy val root = (project in file("."))
   .settings(
@@ -8,6 +8,5 @@ lazy val root = (project in file("."))
     scalacOptions ++= Seq(
       "-Xfatal-warnings"
     ),
-    libraryDependencies ++= Dependencies.cats ++ Seq(),
-    scalafmtOnCompile := true
+    libraryDependencies ++= Dependencies.cats ++ Seq()
   )

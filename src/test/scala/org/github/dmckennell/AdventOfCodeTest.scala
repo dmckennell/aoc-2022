@@ -5,11 +5,12 @@ import cats.effect.testing.scalatest.AsyncIOSpec
 import org.github.dmckennell.Ops.*
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
+import language.experimental.fewerBraces
 
 class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
   "Day 01" - {
-    def getHighestTotal(input: List[String]): Int = {
+    def getHighestTotal(input: List[String]): Int =
       val (_, highest) = input.foldLeft((0, 0)) { case ((acc, highest), current) =>
         if (current == "") {
           if (acc > highest) (0, acc) else (0, highest)
@@ -18,24 +19,19 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         }
       }
       highest
-    }
 
-    "sample" in {
-      linesFor(Day.`1`, Input.sample, Part.a).use { lines =>
+    "sample" in:
+      linesFor(Day.`1`, Input.sample, Part.a).use: lines =>
         val calories = lines ++ List("")
         IO.println(getHighestTotal(calories))
-      }
-    }
 
-    "part a" in {
-      linesFor(Day.`1`, Input.real, Part.a).use { lines =>
+    "part a" in:
+      linesFor(Day.`1`, Input.real, Part.a).use: lines =>
         val calories = lines ++ List("")
         IO.println(getHighestTotal(calories))
-      }
-    }
 
-    "part b" in {
-      linesFor(Day.`1`, Input.real, Part.b).use { lines =>
+    "part b" in:
+      linesFor(Day.`1`, Input.real, Part.b).use: lines =>
         val calories = lines ++ List("")
         val (_, highest3) = calories.foldLeft((0, List(0, 0, 0))) { case ((acc, highest3), current) =>
           if (current == "")
@@ -45,8 +41,6 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
             (acc + current.toInt, highest3)
         }
         IO.println(highest3.sum)
-      }
-    }
   }
 
   "Day 02" - {
@@ -68,8 +62,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     )
     val losesAgainst = winsAgainst.map(_.swap)
 
-    object PartA {
-
+    object PartA:
       def determineChoice(letter: Char): Choice =
         letter match
           case 'X' | 'A' => Choice.Rock
@@ -89,9 +82,8 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
           determineMyOutcome(myChoice, opponentChoice).score + myChoice.value
         }.sum
-    }
 
-    object PartB {
+    object PartB:
       def determineOpponentChoice(letter: Char): Choice =
         letter match
           case 'A' => Choice.Rock
@@ -118,31 +110,22 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
         outcome.score + myChoice.value
       }.sum
-    }
 
-    "sample part a" in {
-      linesFor(Day.`2`, Input.sample, Part.a).use { lines =>
+    "sample part a" in:
+      linesFor(Day.`2`, Input.sample, Part.a).use: lines =>
         IO.println(PartA.solve(lines))
-      }
-    }
 
-    "part a" in {
-      linesFor(Day.`2`, Input.real, Part.a).use { lines =>
+    "part a" in:
+      linesFor(Day.`2`, Input.real, Part.a).use: lines =>
         IO.println(PartA.solve(lines))
-      }
-    }
 
-    "sample part b" in {
-      linesFor(Day.`2`, Input.sample, Part.b).use { lines =>
+    "sample part b" in:
+      linesFor(Day.`2`, Input.sample, Part.b).use: lines =>
         IO.println(PartB.solve(lines))
-      }
-    }
 
-    "part b" in {
-      linesFor(Day.`2`, Input.real, Part.b).use { lines =>
+    "part b" in:
+      linesFor(Day.`2`, Input.real, Part.b).use: lines =>
         IO.println(PartB.solve(lines))
-      }
-    }
   }
 
   "Day 03" - {
@@ -153,11 +136,10 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
     val letterScores = letters.zip(scores).toMap
 
-    object PartA {
-      def splitCompartments(rucksack: String): (String, String) = {
+    object PartA:
+      def splitCompartments(rucksack: String): (String, String) =
         val (first, second) = rucksack.splitAt(rucksack.length / 2)
         (first.distinct, second.distinct)
-      }
 
       def findDuplicate(firstCompartment: String, secondCompartment: String): Option[Char] =
         firstCompartment.collectFirst {
@@ -168,9 +150,8 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         rucksacks.map(splitCompartments).map { case (first, second) =>
           findDuplicate(first, second).fold(0)(letterScores)
         }.sum
-    }
 
-    object PartB {
+    object PartB:
       def groupElves(rucksacks: List[String]): List[List[String]] =
         rucksacks.grouped(3).toList
 
@@ -184,37 +165,26 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
           case List(first, second, third) => findTriplicate(first, second, third).fold(0)(letterScores)
           case _                          => fail()
         }.sum
-    }
 
-    "sample part a" in {
-      linesFor(Day.`3`, Input.sample, Part.a).use { lines =>
+    "sample part a" in:
+      linesFor(Day.`3`, Input.sample, Part.a).use: lines =>
         IO.println(PartA.solve(lines))
-      }
-    }
 
-    "part a" in {
-      linesFor(Day.`3`, Input.real, Part.a).use { lines =>
+    "part a" in:
+      linesFor(Day.`3`, Input.real, Part.a).use: lines =>
         IO.println(PartA.solve(lines))
-      }
-    }
 
-    "sample part b" in {
-      linesFor(Day.`3`, Input.sample, Part.b).use { lines =>
+    "sample part b" in:
+      linesFor(Day.`3`, Input.sample, Part.b).use: lines =>
         IO.println(PartB.solve(lines))
-      }
-    }
 
-    "part b" in {
-      linesFor(Day.`3`, Input.real, Part.b).use { lines =>
-        timed {
+    "part b" in:
+      linesFor(Day.`3`, Input.real, Part.b).use: lines =>
+        timed:
           IO.println(PartB.solve(lines))
-        }
-      }
-    }
   }
 
   "Day 4" - {
-
     case class Section(begin: Int, end: Int)
 
     def getElfPairs(assignmentInput: String): (Section, Section) =
@@ -224,41 +194,31 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
           val Array(beginSecond, endSecond) = second.split("-")
           (Section(beginFirst.toInt, endFirst.toInt), Section(beginSecond.toInt, endSecond.toInt))
 
-    object PartA {
+    object PartA:
       def sectionContainsOther(thisSection: Section, thatSection: Section): Boolean =
         (thisSection.begin <= thatSection.begin && thisSection.end >= thatSection.end)
         ||
         (thatSection.begin <= thisSection.begin && thatSection.end >= thisSection.end)
-    }
 
-    object PartB {
+    object PartB:
       def sectionOverlapsOther(thisSection: Section, thatSection: Section): Boolean =
         !((thisSection.end < thatSection.begin) || (thatSection.end < thisSection.begin))
-    }
 
-    "sample part a" in {
-      linesFor(Day.`4`, Input.sample, Part.a).use { lines =>
+    "sample part a" in:
+      linesFor(Day.`4`, Input.sample, Part.a).use: lines =>
         IO.println(lines.map(getElfPairs).filter(PartA.sectionContainsOther).size)
-      }
-    }
 
-    "part a" in {
-      linesFor(Day.`4`, Input.real, Part.a).use { lines =>
+    "part a" in:
+      linesFor(Day.`4`, Input.real, Part.a).use: lines =>
         IO.println(lines.map(getElfPairs).filter(PartA.sectionContainsOther).size)
-      }
-    }
 
-    "sample part b" in {
-      linesFor(Day.`4`, Input.sample, Part.b).use { lines =>
+    "sample part b" in:
+      linesFor(Day.`4`, Input.sample, Part.b).use: lines =>
         IO.println(lines.map(getElfPairs).filter(PartB.sectionOverlapsOther).size)
-      }
-    }
 
-    "part b" in {
-      linesFor(Day.`4`, Input.real, Part.b).use { lines =>
+    "part b" in:
+      linesFor(Day.`4`, Input.real, Part.b).use: lines =>
         IO.println(lines.map(getElfPairs).filter(PartB.sectionOverlapsOther).size)
-      }
-    }
   }
 
 }
