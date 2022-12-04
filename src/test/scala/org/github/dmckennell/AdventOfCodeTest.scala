@@ -71,18 +71,16 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     object PartA {
 
       def determineChoice(letter: Char): Choice =
-        letter match {
+        letter match
           case 'X' | 'A' => Choice.Rock
           case 'Y' | 'B' => Choice.Paper
           case 'Z' | 'C' => Choice.Scissors
-        }
 
       def determineMyOutcome(me: Choice, opponent: Choice): Outcome =
-        (me, opponent) match {
+        (me, opponent) match
           case (_, _) if winsAgainst(opponent) == me => Outcome.Win
           case (_, _) if me == opponent              => Outcome.Draw
           case _                                     => Outcome.Loss
-        }
 
       def solve(lines: List[String]): Int =
         lines.map { game =>
@@ -95,25 +93,22 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
     object PartB {
       def determineOpponentChoice(letter: Char): Choice =
-        letter match {
+        letter match
           case 'A' => Choice.Rock
           case 'B' => Choice.Paper
           case 'C' => Choice.Scissors
-        }
 
       def determineOutcome(letter: Char): Outcome =
-        letter match {
+        letter match
           case 'X' => Outcome.Loss
           case 'Y' => Outcome.Draw
           case 'Z' => Outcome.Win
-        }
 
       def determineMyChoice(outcome: Outcome, opponent: Choice): Choice =
-        outcome match {
+        outcome match
           case Outcome.Win  => winsAgainst(opponent)
           case Outcome.Draw => opponent
           case Outcome.Loss => losesAgainst(opponent)
-        }
 
       def solve(lines: List[String]): Int = lines.map { game =>
         val Array(opponent, result) = game.split(" ").take(2)
