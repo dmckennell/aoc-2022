@@ -6,8 +6,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "aoc-2022",
     scalacOptions ++= Seq(
-      "-Xfatal-warnings",
-      "-implicit-recursion"
+      "-Xfatal-warnings"
     ),
     libraryDependencies ++= Dependencies.cats ++ Seq(),
     scalafmtOnCompile := true

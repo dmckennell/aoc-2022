@@ -13,7 +13,7 @@ object Ops:
     case a, b
 
   enum Day:
-    case `1`, `2`, `3`
+    case `1`, `2`, `3`, `4`
 
   def linesFor(day: Day, input: Input, part: Part): Resource[IO, List[String]] =
     val source = Source.fromFile(s"./input/${day.toString}/${input.toString}.txt")

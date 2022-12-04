@@ -213,4 +213,52 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     }
   }
 
+  "Day 4" - {
+
+    case class Section(begin: Int, end: Int)
+
+    def getElfPairs(assignmentInput: String): (Section, Section) =
+      assignmentInput.split(",") match
+        case Array(first, second) =>
+          val Array(beginFirst, endFirst)   = first.split("-")
+          val Array(beginSecond, endSecond) = second.split("-")
+          (Section(beginFirst.toInt, endFirst.toInt), Section(beginSecond.toInt, endSecond.toInt))
+
+    object PartA {
+      def sectionContainsOther(thisSection: Section, thatSection: Section): Boolean =
+        (thisSection.begin <= thatSection.begin && thisSection.end >= thatSection.end)
+        ||
+        (thatSection.begin <= thisSection.begin && thatSection.end >= thisSection.end)
+    }
+
+    object PartB {
+      def sectionOverlapsOther(thisSection: Section, thatSection: Section): Boolean =
+        !((thisSection.end < thatSection.begin) || (thatSection.end < thisSection.begin))
+    }
+
+    "sample part a" in {
+      linesFor(Day.`4`, Input.sample, Part.a).use { lines =>
+        IO.println(lines.map(getElfPairs).filter(PartA.sectionContainsOther).size)
+      }
+    }
+
+    "part a" in {
+      linesFor(Day.`4`, Input.real, Part.a).use { lines =>
+        IO.println(lines.map(getElfPairs).filter(PartA.sectionContainsOther).size)
+      }
+    }
+
+    "sample part b" in {
+      linesFor(Day.`4`, Input.sample, Part.b).use { lines =>
+        IO.println(lines.map(getElfPairs).filter(PartB.sectionOverlapsOther).size)
+      }
+    }
+
+    "part b" in {
+      linesFor(Day.`4`, Input.real, Part.b).use { lines =>
+        IO.println(lines.map(getElfPairs).filter(PartB.sectionOverlapsOther).size)
+      }
+    }
+  }
+
 }
