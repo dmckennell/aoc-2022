@@ -276,7 +276,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         .toArray
         .sortBy: (idx, _) =>
           idx
-        .flatMap: (idx, crates) =>
+        .flatMap: (_, crates) =>
           crates.lastOption
         .mkString
 
