@@ -260,14 +260,14 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
       
     def solve(input: String, craneMoverModel: CraneMoverModel): String =
       val (instructions, cratesMap) = parseInput(input)
-      val result = instructions.foldLeft(cratesMap) { (currentCrates, instruction) =>
-        val from        = currentCrates(instruction.from)
-        val to          = currentCrates(instruction.to)
+      val result = instructions.foldLeft(cratesMap) { (currentStacks, instruction) =>
+        val from        = currentStacks(instruction.from)
+        val to          = currentStacks(instruction.to)
         val valuesToAdd = from.takeRight(instruction.number)
         val add         = craneMoverModel match
           case CraneMoverModel.`9000` => valuesToAdd.reverse
           case CraneMoverModel.`9001` => valuesToAdd
-        currentCrates
+        currentStacks
           .updated(instruction.from, from.dropRight(instruction.number))
           .updated(instruction.to, to ++: add)
       }
