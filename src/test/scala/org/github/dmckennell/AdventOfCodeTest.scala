@@ -250,17 +250,14 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
           (idx + 1, crateArray)
         }.toMap
 
+    /*
+        Following modifications made to input:
+          - stack number line removed
+          - empty crates have been relabelled as [-]
+    */
     def parseInput(input: String): (Array[Instruction], Map[Int, Array[Char]]) =
       val Array(crateInfo, instructionInfo) = input.split("\\n\\n")
-      val cratesOutput = gatherCrates(crateInfo)
-      cratesPrint(cratesOutput)
-      (gatherInstructions(instructionInfo), cratesOutput)
-
-    def cratesPrint(crates: Map[Int, Array[Char]]): Unit =
-      crates.toArray.sortBy(_._1).foreach { (idx, crates) =>
-        val paddedCrates = crates.map(c => s"[$c]")
-        println(s"""$idx ${paddedCrates.mkString(" ")}""")
-      }
+      (gatherInstructions(instructionInfo), gatherCrates(crateInfo))
       
     def solve(input: String, craneMoverModel: CraneMoverModel): String =
       val (instructions, cratesMap) = parseInput(input)
@@ -275,7 +272,6 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
           .updated(instruction.from, from.dropRight(instruction.number))
           .updated(instruction.to, to ++: add)
       }
-      cratesPrint(result)
       result
         .toArray
         .sortBy: (idx, _) =>
