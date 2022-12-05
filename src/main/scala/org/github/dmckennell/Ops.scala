@@ -15,25 +15,21 @@ object Ops:
   enum Day:
     case `1`, `2`, `3`, `4`, `5`
 
-  def linesFor(day: Day, input: Input, part: Part): Resource[IO, List[String]] =
+  private def extractInputFromSource[A](day: Day, input: Input, part: Part)(f: Source => A): Resource[IO, A] =
     val source = Source.fromFile(s"./input/${day.toString}/${input.toString}.txt")
     Resource.make {
       IO.println(s"Opening file for day ${day.toString} part ${part.toString} with ${input.toString} input") *>
-        IO(source.getLines().toList)
+        IO(f(source))
     } { _ =>
       IO.println(s"Closing file for day ${day.toString} part ${part.toString} with ${input.toString} input") *>
         IO(source.close())
     }
 
+  def linesFor(day: Day, input: Input, part: Part): Resource[IO, List[String]] =
+    extractInputFromSource(day, input, part)(_.getLines.toList)
+
   def inputStringFor(day: Day, input: Input, part: Part): Resource[IO, String] =
-    val source = Source.fromFile(s"./input/${day.toString}/${input.toString}.txt")
-    Resource.make {
-      IO.println(s"Opening file for day ${day.toString} part ${part.toString} with ${input.toString} input") *>
-        IO(source.mkString)
-    } { _ =>
-      IO.println(s"Closing file for day ${day.toString} part ${part.toString} with ${input.toString} input") *>
-        IO(source.close())
-    }
+    extractInputFromSource(day, input, part)(_.mkString)
 
   def timed(f: => IO[Unit]): IO[Unit] =
     for
