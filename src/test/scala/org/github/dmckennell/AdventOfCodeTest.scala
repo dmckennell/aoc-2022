@@ -206,19 +206,75 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
     "sample part a" in:
       linesFor(Day.`4`, Input.sample, Part.a).use: lines =>
-        IO.println(lines.map(getElfPairs).filter(PartA.sectionContainsOther).size)
+        IO.println(lines.map(getElfPairs).count(PartA.sectionContainsOther))
 
     "part a" in:
       linesFor(Day.`4`, Input.real, Part.a).use: lines =>
-        IO.println(lines.map(getElfPairs).filter(PartA.sectionContainsOther).size)
+        IO.println(lines.map(getElfPairs).count(PartA.sectionContainsOther))
 
     "sample part b" in:
       linesFor(Day.`4`, Input.sample, Part.b).use: lines =>
-        IO.println(lines.map(getElfPairs).filter(PartB.sectionOverlapsOther).size)
+        IO.println(lines.map(getElfPairs).count(PartB.sectionOverlapsOther))
 
     "part b" in:
       linesFor(Day.`4`, Input.real, Part.b).use: lines =>
-        IO.println(lines.map(getElfPairs).filter(PartB.sectionOverlapsOther).size)
+        IO.println(lines.map(getElfPairs).count(PartB.sectionOverlapsOther))
+  }
+
+  "Day 5" - {
+
+    case class Instruction(from: Int, to: Int, number: Int)
+
+    val crateRegex = """(\s{3}|\[[A-Z-]\])""".r
+    val instructionRegex = """^move\s(\d+)\sfrom\s(\d+)\sto\s(\d+)$""".r
+
+    def parseInput(input: String): (Array[Instruction], Map[Int, Array[String]]) =
+      val Array(crateInfo, instructionInfo) = input.split("\\n\\n")
+      val cratesLines = crateInfo.split("\\n")
+      val crates = cratesLines.dropRight(1)
+      val instructionsLines = instructionInfo.split("\\n")
+      val instructionsOutput = instructionsLines.map {
+        case instructionRegex(number, from, to) => Instruction(from.toInt, to.toInt, number.toInt)
+      }
+      val cratesArrays = crates.map { crate =>
+        val matches = crateRegex.findAllMatchIn(crate)
+        matches.map(_.group(1)).toArray
+      }.transpose.map(_.reverse.filterNot(_ == """[-]""").map(_.replaceAll("""\[|\]""", ""))).filterNot(_.isEmpty) 
+      val cratesOutput = cratesArrays.zipWithIndex.map { (crateArray, idx) =>
+        (idx + 1, crateArray)
+      }.toMap
+      cratesPrint(cratesOutput)
+      (instructionsOutput, cratesOutput)
+
+    def cratesPrint(crates: Map[Int, Array[String]]): Unit =
+      crates.toArray.sortBy(_._1).foreach { (idx, crates) =>
+        val paddedCrates = crates.map(c => s"[$c]")
+        println(s"""$idx ${paddedCrates.mkString(" ")}""")
+      }
+
+    object PartA {
+      def solve(input: String): String =
+        val (instructions, cratesMap) = parseInput(input)
+        val result = instructions.foldLeft(cratesMap) { (currentCrates, instruction) =>
+          val from = currentCrates(instruction.from)
+          val to = currentCrates(instruction.to)
+          val add = from.takeRight(instruction.number).reverse
+          val dropped = currentCrates.updated(instruction.from, from.dropRight(instruction.number))
+          val added = dropped.updated(instruction.to, to ++: add)
+          added
+        }
+        cratesPrint(result)
+        result.toArray.sortBy(_._1).flatMap(_._2.lastOption).mkString("")
+    }
+
+    "sample part a" in:
+      inputStringFor(Day.`5`, Input.sample, Part.a).use: input =>
+        IO.println(PartA.solve(input))
+
+    "part a" in :
+      inputStringFor(Day.`5`, Input.real, Part.a).use: input =>
+        IO.println(PartA.solve(input))
+
   }
 
 }
