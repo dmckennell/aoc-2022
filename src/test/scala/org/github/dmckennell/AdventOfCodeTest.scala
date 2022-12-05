@@ -75,12 +75,12 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
           case _                                     => Outcome.Loss
 
       def solve(lines: List[String]): Int =
-        lines.map { game =>
+        lines.map: game =>
           val Array(opponent, me)        = game.split(" ").take(2)
           val (opponentChoice, myChoice) = (determineChoice(opponent.charAt(0)), determineChoice(me.charAt(0)))
 
           determineMyOutcome(myChoice, opponentChoice).score + myChoice.value
-        }.sum
+        .sum
 
     object PartB:
       def determineOpponentChoice(letter: Char): Choice =
@@ -101,14 +101,15 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
           case Outcome.Draw => opponent
           case Outcome.Loss => losesAgainst(opponent)
 
-      def solve(lines: List[String]): Int = lines.map { game =>
-        val Array(opponent, result) = game.split(" ").take(2)
-        val opponentChoice          = determineOpponentChoice(opponent.charAt(0))
-        val outcome                 = determineOutcome(result.charAt(0))
-        val myChoice                = determineMyChoice(outcome, opponentChoice)
+      def solve(lines: List[String]): Int = 
+        lines.map: game =>
+          val Array(opponent, result) = game.split(" ").take(2)
+          val opponentChoice          = determineOpponentChoice(opponent.charAt(0))
+          val outcome                 = determineOutcome(result.charAt(0))
+          val myChoice                = determineMyChoice(outcome, opponentChoice)
 
-        outcome.score + myChoice.value
-      }.sum
+          outcome.score + myChoice.value
+        .sum
 
     "sample part a" in:
       linesFor(Day.`2`, Input.sample, Part.a).use: lines =>
@@ -260,7 +261,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
       
     def solve(input: String, craneMoverModel: CraneMoverModel): String =
       val (instructions, cratesMap) = parseInput(input)
-      val result = instructions.foldLeft(cratesMap) { (currentStacks, instruction) =>
+      instructions.foldLeft(cratesMap): (currentStacks, instruction) =>
         val from        = currentStacks(instruction.from)
         val to          = currentStacks(instruction.to)
         val valuesToAdd = from.takeRight(instruction.number)
@@ -270,14 +271,12 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
         currentStacks
           .updated(instruction.from, from.dropRight(instruction.number))
           .updated(instruction.to, to ++: add)
-      }
-      result
-        .toArray
-        .sortBy: (idx, _) =>
-          idx
-        .flatMap: (_, crates) =>
-          crates.lastOption
-        .mkString
+      .toArray
+      .sortBy: (idx, _) =>
+        idx
+      .flatMap: (_, crates) =>
+        crates.lastOption
+      .mkString
 
     "sample part a" in:
       inputStringFor(Day.`5`, Input.sample, Part.a).use: input =>
