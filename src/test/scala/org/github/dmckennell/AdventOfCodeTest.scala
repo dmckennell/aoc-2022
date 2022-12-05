@@ -147,9 +147,9 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
         }
 
       def solve(rucksacks: List[String]): Int =
-        rucksacks.map(splitCompartments).map { case (first, second) =>
+        rucksacks.map(splitCompartments).map: (first, second) =>
           findDuplicate(first, second).fold(0)(letterScores)
-        }.sum
+        .sum
 
     object PartB:
       def groupElves(rucksacks: List[String]): List[List[String]] =
