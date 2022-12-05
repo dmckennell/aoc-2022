@@ -12,11 +12,10 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
   "Day 01" - {
     def getHighestTotal(input: List[String]): Int =
       val (_, highest) = input.foldLeft((0, 0)) { case ((acc, highest), current) =>
-        if (current == "") {
+        if (current == "")
           if (acc > highest) (0, acc) else (0, highest)
-        } else {
+        else
           (acc + current.toInt, highest)
-        }
       }
       highest
 
