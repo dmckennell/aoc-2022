@@ -53,7 +53,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
     enum Outcome(val score: Int):
       case Win  extends Outcome(6)
       case Draw extends Outcome(3)
-      case Loss extends Outcome(0)
+      case Loss extends Outcome(0) 
 
     val winsAgainst: Map[Choice, Choice] = Map(
       Choice.Rock     -> Choice.Paper,
@@ -223,57 +223,82 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
   "Day 5" - {
 
+    enum CraneMoverModel:
+      case `9000`, `9001`
+
     case class Instruction(from: Int, to: Int, number: Int)
 
-    val crateRegex = """(\s{3}|\[[A-Z-]\])""".r
+    val crateRegex = """\[([A-Z-])\]""".r
     val instructionRegex = """^move\s(\d+)\sfrom\s(\d+)\sto\s(\d+)$""".r
 
-    def parseInput(input: String): (Array[Instruction], Map[Int, Array[String]]) =
-      val Array(crateInfo, instructionInfo) = input.split("\\n\\n")
-      val cratesLines = crateInfo.split("\\n")
-      val crates = cratesLines.dropRight(1)
-      val instructionsLines = instructionInfo.split("\\n")
-      val instructionsOutput = instructionsLines.map {
+    def gatherInstructions(instructionsInput: String): Array[Instruction] =
+      instructionsInput.split("\\n").map {
         case instructionRegex(number, from, to) => Instruction(from.toInt, to.toInt, number.toInt)
       }
-      val cratesArrays = crates.map { crate =>
-        val matches = crateRegex.findAllMatchIn(crate)
-        matches.map(_.group(1)).toArray
-      }.transpose.map(_.reverse.filterNot(_ == """[-]""").map(_.replaceAll("""\[|\]""", ""))).filterNot(_.isEmpty) 
-      val cratesOutput = cratesArrays.zipWithIndex.map { (crateArray, idx) =>
-        (idx + 1, crateArray)
-      }.toMap
-      cratesPrint(cratesOutput)
-      (instructionsOutput, cratesOutput)
 
-    def cratesPrint(crates: Map[Int, Array[String]]): Unit =
+    def gatherCrates(cratesInput: String): Map[Int, Array[Char]] =
+      cratesInput.split("\\n")
+        .map: crate =>
+          crateRegex.findAllMatchIn(crate).map(_.group(1)).toArray
+        .transpose
+        .map: crates =>
+          crates
+            .reverse
+            .filterNot(_ == "-") // input blank crates have been changed to hyphens for convenience
+            .map(_.charAt(0))
+        .zipWithIndex.map { (crateArray, idx) =>
+          (idx + 1, crateArray)
+        }.toMap
+
+    def parseInput(input: String): (Array[Instruction], Map[Int, Array[Char]]) =
+      val Array(crateInfo, instructionInfo) = input.split("\\n\\n")
+      val cratesOutput = gatherCrates(crateInfo)
+      cratesPrint(cratesOutput)
+      (gatherInstructions(instructionInfo), cratesOutput)
+
+    def cratesPrint(crates: Map[Int, Array[Char]]): Unit =
       crates.toArray.sortBy(_._1).foreach { (idx, crates) =>
         val paddedCrates = crates.map(c => s"[$c]")
         println(s"""$idx ${paddedCrates.mkString(" ")}""")
       }
-
-    object PartA {
-      def solve(input: String): String =
-        val (instructions, cratesMap) = parseInput(input)
-        val result = instructions.foldLeft(cratesMap) { (currentCrates, instruction) =>
-          val from = currentCrates(instruction.from)
-          val to = currentCrates(instruction.to)
-          val add = from.takeRight(instruction.number).reverse
-          val dropped = currentCrates.updated(instruction.from, from.dropRight(instruction.number))
-          val added = dropped.updated(instruction.to, to ++: add)
-          added
-        }
-        cratesPrint(result)
-        result.toArray.sortBy(_._1).flatMap(_._2.lastOption).mkString("")
-    }
+      
+    def solve(input: String, craneMoverModel: CraneMoverModel): String =
+      val (instructions, cratesMap) = parseInput(input)
+      val result = instructions.foldLeft(cratesMap) { (currentCrates, instruction) =>
+        val from        = currentCrates(instruction.from)
+        val to          = currentCrates(instruction.to)
+        val valuesToAdd = from.takeRight(instruction.number)
+        val add         = craneMoverModel match
+          case CraneMoverModel.`9000` => valuesToAdd.reverse
+          case CraneMoverModel.`9001` => valuesToAdd
+        currentCrates
+          .updated(instruction.from, from.dropRight(instruction.number))
+          .updated(instruction.to, to ++: add)
+      }
+      cratesPrint(result)
+      result
+        .toArray
+        .sortBy: (idx, _) =>
+          idx
+        .flatMap: (idx, crates) =>
+          crates.lastOption
+        .mkString
 
     "sample part a" in:
       inputStringFor(Day.`5`, Input.sample, Part.a).use: input =>
-        IO.println(PartA.solve(input))
+        IO.println(solve(input, CraneMoverModel.`9000`))
 
     "part a" in :
       inputStringFor(Day.`5`, Input.real, Part.a).use: input =>
-        IO.println(PartA.solve(input))
+        IO.println(solve(input, CraneMoverModel.`9000`))
+    
+    "sample part b" in:
+      inputStringFor(Day.`5`, Input.sample, Part.b).use: input =>
+        IO.println(solve(input, CraneMoverModel.`9001`))
+
+    "part b" in :
+      inputStringFor(Day.`5`, Input.real, Part.b).use: input =>
+        IO.println(solve(input, CraneMoverModel.`9001`))  
 
   }
 
