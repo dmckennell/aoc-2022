@@ -7,7 +7,7 @@ import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 import language.experimental.fewerBraces
 
-class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
+class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
 
   "Day 01" - {
     def getHighestTotal(input: List[String]): Int =
@@ -246,9 +246,9 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
             .reverse
             .filterNot(_ == "-") // input blank crates have been changed to hyphens for convenience
             .map(_.charAt(0))
-        .zipWithIndex.map { (crateArray, idx) =>
+        .zipWithIndex.map: (crateArray, idx) =>
           (idx + 1, crateArray)
-        }.toMap
+        .toMap
 
     /*
         Following modifications made to input:
@@ -292,7 +292,6 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
     "part b" in :
       inputStringFor(Day.`5`, Input.real, Part.b).use: input =>
-        IO.println(solve(input, CraneMoverModel.`9001`))
+        timed:
+          IO.println(solve(input, CraneMoverModel.`9001`))
   }
-
-}
