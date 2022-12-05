@@ -293,8 +293,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
     "part b" in :
       inputStringFor(Day.`5`, Input.real, Part.b).use: input =>
-        IO.println(solve(input, CraneMoverModel.`9001`))  
-
+        IO.println(solve(input, CraneMoverModel.`9001`))
   }
 
 }
