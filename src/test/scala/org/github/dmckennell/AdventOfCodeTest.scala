@@ -237,8 +237,8 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
     def gatherCrates(cratesInput: String): Map[Int, Array[Char]] =
       cratesInput.split("\\n")
-        .map: crate =>
-          crateRegex.findAllMatchIn(crate).map(_.group(1)).toArray
+        .map: cratesSlice =>
+          crateRegex.findAllMatchIn(cratesSlice).map(_.group(1)).toArray
         .transpose
         .map: crates =>
           crates
