@@ -129,12 +129,10 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
   }
 
   "Day 03" - {
-    val scores    = 1 to 52
-    val lowerCase = 'a' to 'z'
-    val upperCase = lowerCase.map(_.toUpper)
-    val letters   = lowerCase ++ upperCase
-
-    val letterScores = letters.zip(scores).toMap
+    def getScore(character: Char): Int =
+      character match 
+        case c if c.isUpper => c.toInt - 38
+        case c              => c.toInt - 96 // must be lowercase
 
     object PartA:
       def splitCompartments(rucksack: String): (String, String) =
@@ -148,7 +146,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
 
       def solve(rucksacks: List[String]): Int =
         rucksacks.map(splitCompartments).map: (first, second) =>
-          findDuplicate(first, second).fold(0)(letterScores)
+          findDuplicate(first, second).fold(0)(getScore)
         .sum
 
     object PartB:
@@ -162,7 +160,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
 
       def solve(rucksacks: List[String]): Int =
         groupElves(rucksacks).map {
-          case List(first, second, third) => findTriplicate(first, second, third).fold(0)(letterScores)
+          case List(first, second, third) => findTriplicate(first, second, third).fold(0)(getScore)
           case _                          => fail()
         }.sum
 
