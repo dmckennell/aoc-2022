@@ -303,7 +303,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
         if (buffer.size == (distinctCount - 1) && !buffer.contains(current))
           idx
         else if (buffer.indexOf(current) != -1)
-          val prunedBuffer = buffer.splitAt(buffer.indexOf(current) + 1)._2
+          val (_, prunedBuffer) = buffer.splitAt(buffer.indexOf(current) + 1)
           markerIndexAtEndOfUniqueCharSequence(prunedBuffer :+ current, idx + 1)
         else
           val updatedBuffer = if (buffer.size < distinctCount) buffer :+ current else Array.emptyCharArray
