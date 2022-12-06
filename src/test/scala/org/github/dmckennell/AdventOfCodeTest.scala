@@ -6,6 +6,7 @@ import org.github.dmckennell.Ops.*
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 import language.experimental.fewerBraces
+import scala.annotation.tailrec
 
 class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
 
@@ -296,6 +297,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
 
   "Day 6" - {
     def findFirstMarker(input: String, distinctCount: Int): Int =
+      @tailrec
       def findMarkerIndexAtFourthUnique(check: Array[Char], buffer: Array[Char], idx: Int = 0): Int =
         val current = check.head
         if (buffer.size == (distinctCount - 1) && !buffer.contains(current))
