@@ -293,3 +293,36 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
         timed:
           IO.println(solve(input, CraneMoverModel.`9001`))
   }
+
+  "Day 6" - {
+    def findFirstMarker(input: String, distinctCount: Int): Int =
+      def findMarkerIndexAtFourthUnique(check: Array[Char], buffer: Array[Char], idx: Int = 0): Int =
+        val current = check.head
+        if (buffer.size == (distinctCount - 1) && !buffer.contains(current))
+          idx
+        else if (buffer.indexOf(current) != -1)
+          val prunedBuffer = buffer.splitAt(buffer.indexOf(current) + 1)._2
+          findMarkerIndexAtFourthUnique(check.tail, prunedBuffer :+ current, idx + 1)
+        else
+          val updatedBuffer = if (buffer.size < distinctCount) buffer :+ current else Array.emptyCharArray
+          findMarkerIndexAtFourthUnique(check.tail, updatedBuffer, idx + 1)
+      findMarkerIndexAtFourthUnique(input.toCharArray(), Array.emptyCharArray, 0) + 1
+
+    "sample part a" in:
+      linesFor(Day.`6`, Input.sample, Part.a).use: examples =>
+        IO.println(examples.map(findFirstMarker(_, 4)).mkString(", "))
+    
+    "part a" in:
+      inputStringFor(Day.`6`, Input.real, Part.a).use: input =>
+        timed:
+          IO.println(findFirstMarker(input, 4))
+    
+    "sample part b" in:
+      linesFor(Day.`6`, Input.sample, Part.b).use: examples =>
+        IO.println(examples.map(findFirstMarker(_, 14)).mkString(", "))
+
+    "part b" in:
+      inputStringFor(Day.`6`, Input.real, Part.b).use: input =>
+        timed:
+          IO.println(findFirstMarker(input, 14))
+  }
