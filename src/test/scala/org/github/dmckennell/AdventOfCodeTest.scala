@@ -429,13 +429,13 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
         }.get // a bit lazy
         val totalRemaining = 70000000L - rootDirectoryTotalSize
         val required = 30000000L - totalRemaining
-        val (_, smallestCompensator) =  results.filter { directoryDetails =>
+        val (_, smallestCompensator) =  results.filter: directoryDetails =>
           val (_, totalSize) = directoryDetails
           totalSize >= required 
-        }.minBy { directoryDetails =>
+        .minBy: directoryDetails =>
           val (_, totalSize) = directoryDetails
           totalSize
-        }
+        
         smallestCompensator
 
     "sample part a" in:
