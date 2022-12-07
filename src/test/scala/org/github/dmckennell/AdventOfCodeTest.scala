@@ -361,8 +361,10 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
           currentDirectory.dropRight(1) + newDir
         else
           currentDirectory + "/" + newDir
-          
-      val (directories, _, _) = instructions.foldLeft(List(Directory("/", List.empty, None, Set.empty)), "/", 1) { case ((directories, currentDir, instructionNr), current) =>
+      
+      val (initialDirectories, initialWorkingDirectory, promptIncrement) = (List(Directory("/", List.empty, None, Set.empty)), "/", 1)
+
+      val (directories, _, _) = instructions.foldLeft((initialDirectories, initialWorkingDirectory, promptIncrement)) { case ((directories, currentDir, instructionNr), current) =>
         val newInstructionNr = instructionNr + 1
         current match
           case GoHome => 
