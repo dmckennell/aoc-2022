@@ -332,6 +332,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
 
     case class File(name: String, size: Long) extends PromptLine
     case class DirectoryIdentifier(name: String) extends PromptLine
+
     sealed trait Command extends PromptLine
     case object ListContents extends Command
     case class ChangeDirectory(to: String) extends Command
@@ -356,38 +357,37 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
 
     def gatherFileStructure(input: List[String]): List[Directory] =
       val instructions = input.map(parseLine)
-      def genDirName(currentDirectory: String, newDir: String): String =        
+      def generateFullPathForDirectory(currentDirectory: String, newDir: String): String =        
         if (currentDirectory == "/")
           currentDirectory.dropRight(1) + newDir
         else
           currentDirectory + "/" + newDir
       
-      val (initialDirectories, initialWorkingDirectory, promptIncrement) = (Map("/" -> (Directory("/", Set.empty, None, Set.empty))), "/", 1)
+      val (initialDirectories, initialWorkingDirectory) = (Map("/" -> (Directory("/", Set.empty, None, Set.empty))), "/")
 
-      val (directories, _, _) = instructions.foldLeft((initialDirectories, initialWorkingDirectory, promptIncrement)) { case ((directories, currentDir, instructionNr), current) =>
-        val newInstructionNr = instructionNr + 1
+      val (directories, _) = instructions.foldLeft((initialDirectories, initialWorkingDirectory)) { case ((directories, currentDir), current) =>
         current match
-          case GoHome => (directories, "/", newInstructionNr)
+          case GoHome => (directories, "/")
           case ChangeDirectory(to) =>
             if (to == "..")
               val parent = directories(currentDir).parentName.get
-              (directories, parent, newInstructionNr)
+              (directories, parent)
             else
-              val fullName = genDirName(currentDir, to)
-              (directories, directories(fullName).name, newInstructionNr)
-          case ListContents => (directories, currentDir, newInstructionNr)
+              val fullPath = generateFullPathForDirectory(currentDir, to)
+              (directories, directories(fullPath).name)
+          case ListContents => (directories, currentDir)
           case DirectoryIdentifier(name) => 
-            val fullName = genDirName(currentDir, name)
-            directories.get(fullName) match
+            val fullPath = generateFullPathForDirectory(currentDir, name)
+            directories.get(fullPath) match
               case Some(existing) => 
-                (directories, currentDir, newInstructionNr)
+                (directories, currentDir)
               case None => 
                 val parent = directories(currentDir)
-                (directories + (fullName -> Directory(fullName, Set.empty, currentDir.some, parent.allParents + parent.name)), currentDir, newInstructionNr)
+                (directories + (fullPath -> Directory(fullPath, Set.empty, currentDir.some, parent.allParents + parent.name)), currentDir)
           case f@File(name, size) => 
             val dir = directories(currentDir)
             val updated = dir.copy(files = dir.files + f)
-            (directories.updated(currentDir, updated), currentDir, newInstructionNr)
+            (directories.updated(currentDir, updated), currentDir)
       }
       directories.values.toList
 
@@ -403,7 +403,6 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
                 case Some(parent) => acc.updated(p, (accumulation(p) + head.name))
                 case None => acc + (p -> Set(head.name))
             gather(tail, newAccumulation)
-
       gather(directories) 
     
     def directories2FileTotals(directories: List[Directory]): Map[String, Long] =
@@ -425,10 +424,19 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
     object PartB:
       def solve(input: List[String]): Long = 
         val results = getTotals(gatherFileStructure(input))
-        val totalUsed = results.find(_._1.name == "/").get._2
-        val totalRemaining = 70000000L - totalUsed
+        val (_, rootDirectoryTotalSize) = results.find { case (directory, _) =>
+          directory.name == "/"
+        }.get // a bit lazy
+        val totalRemaining = 70000000L - rootDirectoryTotalSize
         val required = 30000000L - totalRemaining
-        results.filter(_._2 >= required).minBy(_._2)._2
+        val (_, smallestCompensator) =  results.filter { directoryDetails =>
+          val (_, totalSize) = directoryDetails
+          totalSize >= required 
+        }.minBy { directoryDetails =>
+          val (_, totalSize) = directoryDetails
+          totalSize
+        }
+        smallestCompensator
 
     "sample part a" in:
       linesFor(Day.`7`, Input.sample, Part.a).use: input =>
