@@ -362,41 +362,34 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
         else
           currentDirectory + "/" + newDir
       
-      val (initialDirectories, initialWorkingDirectory, promptIncrement) = (List(Directory("/", List.empty, None, Set.empty)), "/", 1)
+      val (initialDirectories, initialWorkingDirectory, promptIncrement) = (Map("/" -> (Directory("/", List.empty, None, Set.empty))), "/", 1)
 
       val (directories, _, _) = instructions.foldLeft((initialDirectories, initialWorkingDirectory, promptIncrement)) { case ((directories, currentDir, instructionNr), current) =>
         val newInstructionNr = instructionNr + 1
         current match
-          case GoHome => 
-            (directories, "/", newInstructionNr)
+          case GoHome => (directories, "/", newInstructionNr)
           case ChangeDirectory(to) =>
             if (to == "..")
-              val parent = directories.find(_.name == currentDir).flatMap(_.parentName).get
+              val parent = directories(currentDir).parentName.get
               (directories, parent, newInstructionNr)
             else
               val fullName = genDirName(currentDir, to)
-              (directories, directories.find(_.name == fullName).map(_.name).get, newInstructionNr)
-          case ListContents => 
-            (directories, currentDir, newInstructionNr)
+              (directories, directories(fullName).name, newInstructionNr)
+          case ListContents => (directories, currentDir, newInstructionNr)
           case DirectoryIdentifier(name) => 
             val fullName = genDirName(currentDir, name)
-            directories.find(_.name == fullName) match
+            directories.get(fullName) match
               case Some(existing) => 
                 (directories, currentDir, newInstructionNr)
               case None => 
-                val parentParents = directories.find(_.name == currentDir) match
-                  case Some(parent) => parent.allParents + parent.name
-                  case None => fail() // shouldn't get here
-                (directories :+ Directory(fullName, List.empty, currentDir.some, parentParents), currentDir, newInstructionNr)
+                val parent = directories(currentDir)
+                (directories + (fullName -> Directory(fullName, List.empty, currentDir.some, parent.allParents + parent.name)), currentDir, newInstructionNr)
           case f@File(name, size) => 
-            directories.find(_.name == currentDir) match
-              case Some(dir) =>
-                val idx = directories.indexOf(dir)
-                val updated = dir.copy(files = dir.files :+ f)
-                (directories.updated(idx, updated), currentDir, newInstructionNr)
-              case None => fail() // shouldn't get here
+            val dir = directories(currentDir)
+            val updated = dir.copy(files = dir.files :+ f)
+            (directories.updated(currentDir, updated), currentDir, newInstructionNr)
       }
-      directories
+      directories.values.toList
 
     def directory2Children(directories: List[Directory]): Map[String, Set[String]] =
       @tailrec
