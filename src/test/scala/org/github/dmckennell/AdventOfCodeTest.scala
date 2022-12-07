@@ -2,6 +2,7 @@ package org.github.dmckennell
 
 import cats.effect.*
 import cats.effect.testing.scalatest.AsyncIOSpec
+import cats.implicits.*
 import org.github.dmckennell.Ops.*
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
@@ -324,4 +325,133 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
       inputStringFor(Day.`6`, Input.real, Part.b).use: input =>
         timed:
           IO.println(findFirstMarker(input, 14))
+  }
+
+  "Day 7" - {
+    sealed trait PromptLine
+
+    case class File(name: String, size: Long) extends PromptLine
+    case class DirectoryIdentifier(name: String) extends PromptLine
+    sealed trait Command extends PromptLine
+    case object ListContents extends Command
+    case class ChangeDirectory(to: String) extends Command
+    case object GoHome extends Command
+
+    case class Directory(name: String, files: List[File], parentName: Option[String], allParents: Set[String])
+
+    def parseLine(input: String): PromptLine =
+      input match 
+        case i if i.startsWith("$") =>
+          i.drop(2).take(2) match 
+            case "ls" => ListContents
+            case "cd" if i.split(" ").last == "/" => GoHome
+            case "cd" => ChangeDirectory(i.split(" ").last)
+            case _ => fail()
+        case i if i.startsWith("dir") =>
+          DirectoryIdentifier(i.split(" ").last)
+        case i =>
+          val Array(size, name) = i.split(" ")
+          File(name, size.toLong)
+        
+
+    def gatherFileStructure(input: List[String]): List[Directory] =
+      val instructions = input.map(parseLine)
+      def genDirName(currentDirectory: String, newDir: String): String =        
+        if (currentDirectory == "/")
+          currentDirectory.dropRight(1) + newDir
+        else
+          currentDirectory + "/" + newDir
+          
+      val (directories, _, _) = instructions.foldLeft(List(Directory("/", List.empty, None, Set.empty)), "/", 1) { case ((directories, currentDir, instructionNr), current) =>
+        val newInstructionNr = instructionNr + 1
+        current match
+          case GoHome => 
+            (directories, "/", newInstructionNr)
+          case ChangeDirectory(to) =>
+            if (to == "..")
+              val parent = directories.find(_.name == currentDir).flatMap(_.parentName).get
+              (directories, parent, newInstructionNr)
+            else
+              val fullName = genDirName(currentDir, to)
+              (directories, directories.find(_.name == fullName).map(_.name).get, newInstructionNr)
+          case ListContents => 
+            (directories, currentDir, newInstructionNr)
+          case DirectoryIdentifier(name) => 
+            val fullName = genDirName(currentDir, name)
+            directories.find(_.name == fullName) match
+              case Some(existing) => 
+                (directories, currentDir, newInstructionNr)
+              case None => 
+                val parentParents = directories.find(_.name == currentDir) match
+                  case Some(parent) => parent.allParents + parent.name
+                  case None => fail() // shouldn't get here
+                (directories :+ Directory(fullName, List.empty, currentDir.some, parentParents), currentDir, newInstructionNr)
+          case f@File(name, size) => 
+            directories.find(_.name == currentDir) match
+              case Some(dir) =>
+                val idx = directories.indexOf(dir)
+                val updated = dir.copy(files = dir.files :+ f)
+                (directories.updated(idx, updated), currentDir, newInstructionNr)
+              case None => fail() // shouldn't get here
+      }
+      directories
+
+    def directory2Children(directories: List[Directory]): Map[String, Set[String]] =
+      @tailrec
+      def gather(remaining: List[Directory], accumulation: Map[String, Set[String]] = Map.empty): Map[String, Set[String]] =
+        remaining match
+          case Nil => 
+            accumulation
+          case head :: tail =>
+            val newAccumulation = head.allParents.foldLeft(accumulation): (acc, p) =>
+              acc.get(p) match
+                case Some(parent) => acc.updated(p, (accumulation(p) + head.name))
+                case None => acc + (p -> Set(head.name))
+            gather(tail, newAccumulation)
+
+      gather(directories) 
+    
+    def directories2FileTotals(directories: List[Directory]): Map[String, Long] =
+      directories.map: directory =>
+        directory.name -> directory.files.map(_.size).sum
+      .toMap
+
+    def getTotals(directories: List[Directory]): List[(Directory, Long)] =
+      val fileTotalsLookup    = directories2FileTotals(directories)
+      val directoriesChildren = directory2Children(directories)
+      directories.map: d =>
+        val childNames = directoriesChildren.get(d.name).getOrElse(Set.empty)
+        (d -> (childNames.map(fileTotalsLookup).sum + d.files.map(_.size).sum))
+
+    object PartA:
+      def solve(input: List[String]): Long =
+        getTotals(gatherFileStructure(input)).filter(_._2 <= 100000).map(_._2).sum
+
+    object PartB:
+      def solve(input: List[String]): Long = 
+        val results = getTotals(gatherFileStructure(input))
+        val totalUsed = results.find(_._1.name == "/").get._2
+        val totalRemaining = 70000000L - totalUsed
+        val required = 30000000L - totalRemaining
+        results.filter(_._2 >= required).minBy(_._2)._2
+
+    "sample part a" in:
+      linesFor(Day.`7`, Input.sample, Part.a).use: input =>
+        timed: 
+          IO.println(PartA.solve(input))
+    
+    "part a" in:
+      linesFor(Day.`7`, Input.real, Part.a).use: input =>
+        timed: 
+          IO.println(PartA.solve(input))
+
+    "sample part b" in:
+      linesFor(Day.`7`, Input.sample, Part.b).use: input =>
+        timed:
+          IO.println(PartB.solve(input))
+
+    "part b" in:
+      linesFor(Day.`7`, Input.real, Part.b).use: input =>
+        timed:
+          IO.println(PartB.solve(input))
   }
