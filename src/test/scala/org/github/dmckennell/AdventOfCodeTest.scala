@@ -337,7 +337,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
     case class ChangeDirectory(to: String) extends Command
     case object GoHome extends Command
 
-    case class Directory(name: String, files: List[File], parentName: Option[String], allParents: Set[String])
+    case class Directory(name: String, files: Set[File], parentName: Option[String], allParents: Set[String])
 
     def parseLine(input: String): PromptLine =
       input match 
@@ -362,7 +362,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
         else
           currentDirectory + "/" + newDir
       
-      val (initialDirectories, initialWorkingDirectory, promptIncrement) = (Map("/" -> (Directory("/", List.empty, None, Set.empty))), "/", 1)
+      val (initialDirectories, initialWorkingDirectory, promptIncrement) = (Map("/" -> (Directory("/", Set.empty, None, Set.empty))), "/", 1)
 
       val (directories, _, _) = instructions.foldLeft((initialDirectories, initialWorkingDirectory, promptIncrement)) { case ((directories, currentDir, instructionNr), current) =>
         val newInstructionNr = instructionNr + 1
@@ -383,10 +383,10 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
                 (directories, currentDir, newInstructionNr)
               case None => 
                 val parent = directories(currentDir)
-                (directories + (fullName -> Directory(fullName, List.empty, currentDir.some, parent.allParents + parent.name)), currentDir, newInstructionNr)
+                (directories + (fullName -> Directory(fullName, Set.empty, currentDir.some, parent.allParents + parent.name)), currentDir, newInstructionNr)
           case f@File(name, size) => 
             val dir = directories(currentDir)
-            val updated = dir.copy(files = dir.files :+ f)
+            val updated = dir.copy(files = dir.files + f)
             (directories.updated(currentDir, updated), currentDir, newInstructionNr)
       }
       directories.values.toList
