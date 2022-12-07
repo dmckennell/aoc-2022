@@ -32,7 +32,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
         IO.println(getHighestTotal(calories))
 
     "part b" in:
-      linesFor(Day.`1`, Input.real, Part.b).use: lines =>
+      linesFor(Day.`1`, Input.real, Part.b).use: lines => 
         val calories = lines ++ List("")
         val (_, highest3) = calories.foldLeft((0, List(0, 0, 0))) { case ((acc, highest3), current) =>
           if (current == "")
@@ -45,7 +45,6 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
   }
 
   "Day 02" - {
-
     enum Choice(val value: Int):
       case Rock     extends Choice(1)
       case Paper    extends Choice(2)
@@ -64,7 +63,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
     val losesAgainst = winsAgainst.map(_.swap)
 
     object PartA:
-      def determineChoice(letter: Char): Choice =
+      def determineChoice(letter: Char): Choice = 
         letter match
           case 'X' | 'A' => Choice.Rock
           case 'Y' | 'B' => Choice.Paper
@@ -76,7 +75,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
           case (_, _) if me == opponent              => Outcome.Draw
           case _                                     => Outcome.Loss
 
-      def solve(lines: List[String]): Int =
+      def solve(lines: List[String]): Int = 
         lines.map: game =>
           val Array(opponent, me)        = game.split(" ").take(2)
           val (opponentChoice, myChoice) = (determineChoice(opponent.charAt(0)), determineChoice(me.charAt(0)))
@@ -222,7 +221,6 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
   }
 
   "Day 5" - {
-
     enum CraneMoverModel:
       case `9000`, `9001`
 
@@ -329,7 +327,6 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
 
   "Day 7" - {
     sealed trait PromptLine
-
     case class File(name: String, size: Long) extends PromptLine
     case class DirectoryIdentifier(name: String) extends PromptLine
 
@@ -337,19 +334,18 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
     case object ListContents extends Command
     case class ChangeDirectory(to: String) extends Command
     case object GoHome extends Command
-
+    
     case class Directory(name: String, files: Set[File], parentName: Option[String], allParents: Set[String])
 
     def parseLine(input: String): PromptLine =
       input match 
         case i if i.startsWith("$") =>
           i.drop(2).take(2) match 
-            case "ls" => ListContents
+            case "ls"                             => ListContents
             case "cd" if i.split(" ").last == "/" => GoHome
-            case "cd" => ChangeDirectory(i.split(" ").last)
-            case _ => fail()
-        case i if i.startsWith("dir") =>
-          DirectoryIdentifier(i.split(" ").last)
+            case "cd"                             => ChangeDirectory(i.split(" ").last)
+            case _                                => fail()
+        case i if i.startsWith("dir") => DirectoryIdentifier(i.split(" ").last)
         case i =>
           val Array(size, name) = i.split(" ")
           File(name, size.toLong)
@@ -367,7 +363,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
 
       val (directories, _) = instructions.foldLeft((initialDirectories, initialWorkingDirectory)) { case ((directories, currentDir), current) =>
         current match
-          case GoHome => (directories, "/")
+          case GoHome              => (directories, "/")
           case ChangeDirectory(to) =>
             if (to == "..")
               val parent = directories(currentDir).parentName.get
@@ -375,12 +371,11 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
             else
               val fullPath = generateFullPathForDirectory(currentDir, to)
               (directories, directories(fullPath).name)
-          case ListContents => (directories, currentDir)
+          case ListContents              => (directories, currentDir)
           case DirectoryIdentifier(name) => 
             val fullPath = generateFullPathForDirectory(currentDir, name)
             directories.get(fullPath) match
-              case Some(existing) => 
-                (directories, currentDir)
+              case Some(existing) => (directories, currentDir)
               case None => 
                 val parent = directories(currentDir)
                 (directories + (fullPath -> Directory(fullPath, Set.empty, currentDir.some, parent.allParents + parent.name)), currentDir)
@@ -395,8 +390,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
       @tailrec
       def gather(remaining: List[Directory], accumulation: Map[String, Set[String]] = Map.empty): Map[String, Set[String]] =
         remaining match
-          case Nil => 
-            accumulation
+          case Nil => accumulation
           case head :: tail =>
             val newAccumulation = head.allParents.foldLeft(accumulation): (acc, p) =>
               acc.get(p) match
