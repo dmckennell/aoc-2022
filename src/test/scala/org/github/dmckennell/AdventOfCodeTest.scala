@@ -387,17 +387,11 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
       directories.values.toList
 
     def directory2Children(directories: List[Directory]): Map[String, Set[String]] =
-      @tailrec
-      def gather(remaining: List[Directory], accumulation: Map[String, Set[String]] = Map.empty): Map[String, Set[String]] =
-        remaining match
-          case Nil          => accumulation
-          case head :: tail =>
-            val newAccumulation = head.allParents.foldLeft(accumulation): (acc, p) =>
-              acc.get(p) match
-                case Some(parent) => acc.updated(p, (accumulation(p) + head.name))
-                case None         => acc + (p -> Set(head.name))
-            gather(tail, newAccumulation)
-      gather(directories) 
+      directories.foldLeft(Map.empty[String, Set[String]]): (acc, current) =>
+        current.allParents.foldLeft(acc): (acc, p) =>
+          acc.get(p) match
+            case Some(parent) => acc.updated(p, (acc(p) + current.name))
+            case None         => acc + (p -> Set(current.name))
     
     def directories2FileTotals(directories: List[Directory]): Map[String, Long] =
       directories.map: directory =>
