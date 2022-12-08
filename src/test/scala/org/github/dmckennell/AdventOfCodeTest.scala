@@ -452,3 +452,91 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
         timed:
           IO.println(PartB.solve(input))
   }
+
+  "Day 8" - {
+
+    def parseInput(input: List[String]): Map[(Int, Int), (List[Int], List[Int])] =
+      val endIdx  = input.size - 1
+      val letters = input.map(_.map(_.toString.toInt).toList)
+      val flipped = letters.transpose
+
+      (for
+        i <- 0 to endIdx
+        j <- 0 to endIdx
+      yield (i, j) -> (letters(i), flipped(j))).toMap
+
+    object PartA:
+      def getVisibles(endIdx: Int, indices2Axes: Map[(Int, Int), (List[Int], List[Int])]): Int =
+        indices2Axes.map: (idx, relevantRows) =>
+          val (iRow, jRow) = relevantRows
+          val (i, j) = idx
+          if (i == 0 || i == endIdx || j == 0 || j == endIdx)
+            true
+          else
+            val (iBefore, iValue, iAfter) = 
+              val (before, inclusiveAfter) = iRow.splitAt(j)
+              (before, inclusiveAfter.head, inclusiveAfter.tail)
+            val (jBefore, jValue, jAfter) =
+              val (before, inclusiveAfter) = jRow.splitAt(i)
+              (before, inclusiveAfter.head, inclusiveAfter.tail)
+            
+            iValue > iBefore.max || iValue > iAfter.max
+            ||
+            jValue > jBefore.max || jValue > jAfter.max
+        .count(identity)
+      
+      def solve(input: List[String]): Int =
+        val endIndex = input.size - 1
+        val parsed = parseInput(input)
+        getVisibles(endIndex, parsed)
+    
+    object PartB:
+      def scenicScore(value: Int, neighbours: List[Int]): Int =
+        @tailrec
+        def count(remainingTrees: List[Int], previousTrees: List[Int], currentCount: Int = 0): Int =
+          remainingTrees match
+            case Nil => currentCount
+            case head :: tail =>
+              if (head < previousTrees.max)
+                count(tail, previousTrees :+ head, currentCount + 1)
+              else currentCount + 1
+        count(neighbours, List(value))
+
+      def highestScenicScore(indices2Axes: Map[(Int, Int), (List[Int], List[Int])]): Int =
+        indices2Axes.map: (idx, relevantRows) =>
+          val (iRow, jRow) = relevantRows
+          val (i, j) = idx
+          val (iBefore, iValue, iAfter) = 
+            val (before, inclusiveAfter) = iRow.splitAt(j)
+            (before, inclusiveAfter.head, inclusiveAfter.tail)
+          val (jBefore, jValue, jAfter) =
+            val (before, inclusiveAfter) = jRow.splitAt(i)
+            (before, inclusiveAfter.head, inclusiveAfter.tail)
+          val leftScore  = scenicScore(iValue, iBefore.reverse)
+          val rightScore = scenicScore(iValue, iAfter)
+          val upScore    = scenicScore(jValue, jBefore.reverse)
+          val downScore  = scenicScore(jValue, jAfter)
+          val total      = leftScore * rightScore * upScore * downScore
+          total
+        .max
+      
+      def solve(input: List[String]): Int =
+        highestScenicScore(parseInput(input))
+
+    "sample part a" in:
+      linesFor(Day.`8`, Input.sample, Part.a).use: input =>
+        IO.println(PartA.solve(input))
+    
+    "part a" in:
+      linesFor(Day.`8`, Input.real, Part.a).use: input =>
+        timed:
+          IO.println(PartA.solve(input))
+
+    "sample part b" in:
+      linesFor(Day.`8`, Input.sample, Part.b).use: input =>
+        IO.println(PartB.solve(input))
+
+    "part b" in:
+      linesFor(Day.`8`, Input.real, Part.b).use: input =>
+        IO.println(PartB.solve(input))
+  }
