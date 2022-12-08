@@ -334,7 +334,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
     case object ListContents extends Command
     case class ChangeDirectory(to: String) extends Command
     case object GoHome extends Command
-    
+
     case class Directory(name: String, files: Set[File], parentName: Option[String], allParents: Set[String])
 
     def parseLine(input: String): PromptLine =
@@ -380,7 +380,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
                 val parent = directories(currentDir)
                 (directories + (fullPath -> Directory(fullPath, Set.empty, currentDir.some, parent.allParents + parent.name)), currentDir)
           case f@File(name, size) => 
-            val dir = directories(currentDir)
+            val dir     = directories(currentDir)
             val updated = dir.copy(files = dir.files + f)
             (directories.updated(currentDir, updated), currentDir)
       }
@@ -390,12 +390,12 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
       @tailrec
       def gather(remaining: List[Directory], accumulation: Map[String, Set[String]] = Map.empty): Map[String, Set[String]] =
         remaining match
-          case Nil => accumulation
+          case Nil          => accumulation
           case head :: tail =>
             val newAccumulation = head.allParents.foldLeft(accumulation): (acc, p) =>
               acc.get(p) match
                 case Some(parent) => acc.updated(p, (accumulation(p) + head.name))
-                case None => acc + (p -> Set(head.name))
+                case None         => acc + (p -> Set(head.name))
             gather(tail, newAccumulation)
       gather(directories) 
     
@@ -413,7 +413,13 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
 
     object PartA:
       def solve(input: List[String]): Long =
-        getTotals(gatherFileStructure(input)).filter(_._2 <= 100000).map(_._2).sum
+        getTotals(gatherFileStructure(input)).filter: directoryDetails =>
+          val (_, totalSize) = directoryDetails
+          totalSize <= 100000L
+        .map: directoryDetails =>
+          val (_, totalSize) = directoryDetails
+          totalSize
+        .sum
 
     object PartB:
       def solve(input: List[String]): Long = 
