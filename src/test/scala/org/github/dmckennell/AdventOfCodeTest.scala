@@ -575,38 +575,9 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
         case Left  => pos.copy(x = pos.x - 1)
         case Right => pos.copy(x = pos.x + 1)
     
-    // FIXME: there must be a simplification
     def catchTailUp(head: Position, tail: Position): Position =
-      if (head.y == tail.y)
-        if (head.x > tail.x)
-          tail.copy(x = tail.x + 1)
-        else
-          tail.copy(x = tail.x - 1)
-      else if (head.x == tail.x)
-        if (head.y > tail.y)
-          tail.copy(y = tail.y + 1)
-        else
-          tail.copy(y = tail.y - 1)
-      else if (head.y - tail.y == 2)
-        if (head.x > tail.x)
-          tail.copy(x = tail.x + 1, y = tail.y + 1)
-        else
-          tail.copy(x = tail.x - 1, y = tail.y + 1)
-      else if (head.y - tail.y == - 2)
-        if (head.x > tail.x)
-          tail.copy(x = tail.x + 1, y = tail.y - 1)
-        else
-          tail.copy(x = tail.x - 1, y = tail.y - 1)
-      else if (head.x - tail.x == 2)
-        if (head.y > tail.y)
-          tail.copy(x = tail.x + 1, y = tail.y + 1)
-        else
-          tail.copy(x = tail.x + 1, y = tail.y - 1)
-      else
-        if (head.y > tail.y)
-          tail.copy(x = tail.x - 1, y = tail.y + 1)
-        else
-          tail.copy(x = tail.x - 1, y = tail.y - 1)
+      val (dx, dy) = ((head.x - tail.x), (head.y - tail.y))
+      tail.copy(x = tail.x + dx.sign * 1, y = tail.y + dy.sign * 1)
 
     def areTouching(head: Position, tail: Position): Boolean =
       (Math.abs(head.x - tail.x) <= 1 && Math.abs(head.y - tail.y) <= 1)
