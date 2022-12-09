@@ -505,16 +505,16 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
         getVisibles(generateTreeIndices(input), input)
     
     object PartB:
-      def scenicScore(value: Int, neighbours: List[Int]): Int =
+      def scenicScore(tree: Int, neighbours: List[Int]): Int =
         @tailrec
-        def count(remainingTrees: List[Int], previousTrees: List[Int], currentCount: Int = 0): Int =
+        def count(remainingTrees: List[Int], currentCount: Int = 0): Int =
           remainingTrees match
             case Nil => currentCount
             case head :: tail =>
-              if (head < previousTrees.max)
-                count(tail, previousTrees :+ head, currentCount + 1)
+              if (head < tree)
+                count(tail, currentCount + 1)
               else currentCount + 1
-        count(neighbours, List(value))
+        count(neighbours)
 
       def highestScenicScore(treeIndices: List[(Int, Int)], input: List[String]): Int = 
         val letters = input.map(_.map(_.toString.toInt).toList)
@@ -553,5 +553,6 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
 
     "part b" in:
       linesFor(Day.`8`, Input.real, Part.b).use: input =>
-        IO.println(PartB.solve(input))
+        timed:
+          IO.println(PartB.solve(input))
   }
