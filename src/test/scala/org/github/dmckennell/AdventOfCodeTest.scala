@@ -592,8 +592,7 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
             if (areTouching(newHead, tail))
               (newHead, tail, seen)
             else
-              val newTail = catchTailUp(newHead, tail)
-              (newHead, newTail, seen + newTail)
+              (newHead, head, seen + head)
           }
         }
         seen.size
