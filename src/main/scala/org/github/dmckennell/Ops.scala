@@ -13,7 +13,7 @@ object Ops:
     case a, b
 
   enum Day:
-    case `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`
+    case `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`
 
   private def extractInputFromSource[A](day: Day, input: Input, part: Part)(f: Source => A): Resource[IO, A] =
     val source = Source.fromFile(s"./input/${day.toString}/${input.toString}.txt")

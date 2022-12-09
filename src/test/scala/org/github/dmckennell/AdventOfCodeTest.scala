@@ -547,3 +547,131 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
         timed:
           IO.println(PartB.solve(input))
   }
+
+  "Day 9" - {
+    sealed trait Direction
+    case object Up extends Direction
+    case object Down extends Direction
+    case object Right extends Direction
+    case object Left extends Direction
+
+    case class Position(x: Int, y: Int)
+
+    def parseInput(movements: List[String]): List[(Direction, Int)] =
+      movements.map: m =>
+        val Array(direction, size) = m.split(" ")
+        direction match
+          case "R" => (Right, size.toInt)
+          case "L" => (Left, size.toInt)
+          case "U" => (Up, size.toInt)
+          case "D" => (Down, size.toInt)
+          case _   => fail()
+
+
+    def moveOneStep(pos: Position, direction: Direction): Position =
+      direction match
+        case Up    => pos.copy(y = pos.y + 1)
+        case Down  => pos.copy(y = pos.y - 1)
+        case Left  => pos.copy(x = pos.x - 1)
+        case Right => pos.copy(x = pos.x + 1)
+    
+    // FIXME: there must be a simplification
+    def catchTailUp(head: Position, tail: Position): Position =
+      if (head.y == tail.y)
+        if (head.x > tail.x)
+          tail.copy(x = tail.x + 1)
+        else
+          tail.copy(x = tail.x - 1)
+      else if (head.x == tail.x)
+        if (head.y > tail.y)
+          tail.copy(y = tail.y + 1)
+        else
+          tail.copy(y = tail.y - 1)
+      else if (head.y - tail.y == 2)
+        if (head.x > tail.x)
+          tail.copy(x = tail.x + 1, y = tail.y + 1)
+        else
+          tail.copy(x = tail.x - 1, y = tail.y + 1)
+      else if (head.y - tail.y == - 2)
+        if (head.x > tail.x)
+          tail.copy(x = tail.x + 1, y = tail.y - 1)
+        else
+          tail.copy(x = tail.x - 1, y = tail.y - 1)
+      else if (head.x - tail.x == 2)
+        if (head.y > tail.y)
+          tail.copy(x = tail.x + 1, y = tail.y + 1)
+        else
+          tail.copy(x = tail.x + 1, y = tail.y - 1)
+      else
+        if (head.y > tail.y)
+          tail.copy(x = tail.x - 1, y = tail.y + 1)
+        else
+          tail.copy(x = tail.x - 1, y = tail.y - 1)
+
+    def areTouching(head: Position, tail: Position): Boolean =
+      (Math.abs(head.x - tail.x) <= 1 && Math.abs(head.y - tail.y) <= 1)
+
+    object PartA:
+      def solve(movements: List[(Direction, Int)]): Int =
+        val initialPosition = Position(0, 0)
+        val (_, _, seen) = movements.foldLeft((initialPosition, initialPosition, Set(initialPosition))) { case ((head, tail, seen), movement) =>
+          val (direction, size) = movement
+          (1 to size).foldLeft((head, tail, seen)) { case ((head, tail, seen), _) =>
+            val newHead = moveOneStep(head, direction)
+            if (areTouching(newHead, tail))
+              (newHead, tail, seen)
+            else
+              val newTail = catchTailUp(newHead, tail)
+              (newHead, newTail, seen + newTail)
+          }
+        }
+        seen.size
+
+    object PartB:
+      def go(head: Position, tail: List[Position]): List[Position] =
+        @tailrec
+        def catchUp(knots: List[Position], done: List[Position]): List[Position] =
+          knots match
+            case Nil          => done
+            case head :: tail =>
+              if (areTouching(done.last, head))
+                catchUp(tail, done :+ head)
+              else
+                val newHead = catchTailUp(done.last, head)
+                catchUp(tail, done :+ newHead)
+                
+        catchUp(tail, List(head)).tail
+
+      def solve(movements: List[(Direction, Int)]): Int =
+        val headInitialPosition = Position(0, 0)
+        val tailInitialPosition = (1 to 9).map: i =>
+          headInitialPosition
+        .toList
+        val (_, _, seen) = movements.foldLeft((headInitialPosition, tailInitialPosition, Set(headInitialPosition))) { case ((head, tail, seen), movement) =>
+          val (direction, size) = movement
+          (1 to size).foldLeft((head, tail, seen)) { case ((head, tail, seen), _) =>
+            val newHead = moveOneStep(head, direction)
+            val newTail = go(newHead, tail)
+            (newHead, newTail, seen + newTail.last)
+          }
+        }
+        seen.size
+
+    "sample part a" in:
+      linesFor(Day.`9`, Input.sample, Part.a).use: input =>
+        IO.println(PartA.solve(parseInput(input)))
+    
+    "part a" in:
+      linesFor(Day.`9`, Input.real, Part.a).use: input =>
+        timed: 
+          IO.println(PartA.solve(parseInput(input)))
+
+    "sample part b" in:
+      linesFor(Day.`9`, Input.sample, Part.b).use: input =>
+        IO.println(PartB.solve(parseInput(input)))
+    
+    "part b" in:
+      linesFor(Day.`9`, Input.real, Part.b).use: input =>
+        timed: 
+          IO.println(PartB.solve(parseInput(input)))
+  }
