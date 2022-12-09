@@ -469,12 +469,12 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
 
     object PartA:
       def getVisibles(treeIndices: List[(Int, Int)], input: List[String]): Int =
-        val (letters, flipped) = treesAndTransposition(input)
-        val endIdx             = input.size - 1
+        val (trees, flipped) = treesAndTransposition(input)
+        val endIdx           = input.size - 1
         
         treeIndices.map: idx =>
           val (i, j)     = idx
-          val horizontal = letters(i)
+          val horizontal = trees(i)
           val vertical   = flipped(j)
           val tree       = horizontal(j)
 
@@ -509,11 +509,11 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
         count(neighbours)
 
       def highestScenicScore(treeIndices: List[(Int, Int)], input: List[String]): Int = 
-        val (letters, flipped) = treesAndTransposition(input)
+        val (trees, flipped) = treesAndTransposition(input)
         
         treeIndices.map: idx =>
           val (i, j)     = idx
-          val horizontal = letters(i)
+          val horizontal = trees(i)
           val vertical   = flipped(j)
           val tree       = horizontal(j)
           val (left, right) = 
