@@ -464,31 +464,45 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
         i <- 0 to endIdx
         j <- 0 to endIdx
       yield (i, j) -> (letters(i), flipped(j))).toMap
+    
+    def generateTreeIndices(input: List[String]): List[(Int, Int)] =
+      val endIdx  = input.size - 1
+
+      (for
+        i <- 0 to endIdx
+        j <- 0 to endIdx
+      yield (i, j)).toList
 
     object PartA:
-      def getVisibles(endIdx: Int, indices2Axes: Map[(Int, Int), (List[Int], List[Int])]): Int =
-        indices2Axes.map: (idx, relevantRows) =>
-          val (iRow, jRow) = relevantRows
-          val (i, j) = idx
+      def getVisibles(treeIndices: List[(Int, Int)], input: List[String]): Int =
+        val letters = input.map(_.map(_.toString.toInt).toList)
+        val flipped = letters.transpose
+        val endIdx  = input.size - 1
+        
+        treeIndices.map: idx =>
+          val (i, j)     = idx
+          val horizontal = letters(i)
+          val vertical   = flipped(j)
+          val tree       = horizontal(j)
+
           if (i == 0 || i == endIdx || j == 0 || j == endIdx)
             true
           else
-            val (iBefore, iValue, iAfter) = 
-              val (before, inclusiveAfter) = iRow.splitAt(j)
-              (before, inclusiveAfter.head, inclusiveAfter.tail)
-            val (jBefore, jValue, jAfter) =
-              val (before, inclusiveAfter) = jRow.splitAt(i)
-              (before, inclusiveAfter.head, inclusiveAfter.tail)
+            val (left, right) = 
+              val (left, rightInclusive) = horizontal.splitAt(j)
+              (left, rightInclusive.tail)
+            val (above, below) =
+              val (above, belowInclusive) = vertical.splitAt(i)
+              (above, belowInclusive.tail)
             
-            iValue > iBefore.max || iValue > iAfter.max
+            tree > left.max || tree > right.max
             ||
-            jValue > jBefore.max || jValue > jAfter.max
+            tree > above.max || tree > below.max
         .count(identity)
+
       
       def solve(input: List[String]): Int =
-        val endIndex = input.size - 1
-        val parsed = parseInput(input)
-        getVisibles(endIndex, parsed)
+        getVisibles(generateTreeIndices(input), input)
     
     object PartB:
       def scenicScore(value: Int, neighbours: List[Int]): Int =
@@ -502,26 +516,27 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
               else currentCount + 1
         count(neighbours, List(value))
 
-      def highestScenicScore(indices2Axes: Map[(Int, Int), (List[Int], List[Int])]): Int =
-        indices2Axes.map: (idx, relevantRows) =>
-          val (iRow, jRow) = relevantRows
-          val (i, j) = idx
-          val (iBefore, iValue, iAfter) = 
-            val (before, inclusiveAfter) = iRow.splitAt(j)
-            (before, inclusiveAfter.head, inclusiveAfter.tail)
-          val (jBefore, jValue, jAfter) =
-            val (before, inclusiveAfter) = jRow.splitAt(i)
-            (before, inclusiveAfter.head, inclusiveAfter.tail)
-          val leftScore  = scenicScore(iValue, iBefore.reverse)
-          val rightScore = scenicScore(iValue, iAfter)
-          val upScore    = scenicScore(jValue, jBefore.reverse)
-          val downScore  = scenicScore(jValue, jAfter)
-          val total      = leftScore * rightScore * upScore * downScore
-          total
+      def highestScenicScore(treeIndices: List[(Int, Int)], input: List[String]): Int = 
+        val letters = input.map(_.map(_.toString.toInt).toList)
+        val flipped = letters.transpose
+        
+        treeIndices.map: idx =>
+          val (i, j)     = idx
+          val horizontal = letters(i)
+          val vertical   = flipped(j)
+          val tree       = horizontal(j)
+          val (left, right) = 
+            val (left, rightInclusive) = horizontal.splitAt(j)
+            (left, rightInclusive.tail)
+          val (above, below) =
+            val (above, belowInclusive) = vertical.splitAt(i)
+            (above, belowInclusive.tail)
+
+          scenicScore(tree, left.reverse) * scenicScore(tree, right) * scenicScore(tree, above.reverse) * scenicScore(tree, below)
         .max
       
       def solve(input: List[String]): Int =
-        highestScenicScore(parseInput(input))
+        highestScenicScore(generateTreeIndices(input), input)
 
     "sample part a" in:
       linesFor(Day.`8`, Input.sample, Part.a).use: input =>
