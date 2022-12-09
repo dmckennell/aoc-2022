@@ -454,17 +454,6 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
   }
 
   "Day 8" - {
-
-    def parseInput(input: List[String]): Map[(Int, Int), (List[Int], List[Int])] =
-      val endIdx  = input.size - 1
-      val letters = input.map(_.map(_.toString.toInt).toList)
-      val flipped = letters.transpose
-
-      (for
-        i <- 0 to endIdx
-        j <- 0 to endIdx
-      yield (i, j) -> (letters(i), flipped(j))).toMap
-    
     def generateTreeIndices(input: List[String]): List[(Int, Int)] =
       val endIdx  = input.size - 1
 
