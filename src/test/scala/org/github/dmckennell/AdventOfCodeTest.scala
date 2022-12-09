@@ -634,13 +634,13 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
           knots match
             case Nil          => done
             case head :: tail =>
-              if (areTouching(done.last, head))
-                catchUp(tail, done :+ head)
+              if (areTouching(done.head, head))
+                catchUp(tail, head +: done)
               else
-                val newHead = catchTailUp(done.last, head)
-                catchUp(tail, done :+ newHead)
+                val newHead = catchTailUp(done.head, head)
+                catchUp(tail, newHead +: done)
                 
-        catchUp(tail, List(head)).tail
+        catchUp(tail, List(head)).dropRight(1)
 
       def solve(movements: List[(Direction, Int)]): Int =
         val headInitialPosition = Position(0, 0)
@@ -651,8 +651,8 @@ class AdventOfCodeTest extends AsyncFreeSpec with AsyncIOSpec with Matchers:
           val (direction, size) = movement
           (1 to size).foldLeft((head, tail, seen)) { case ((head, tail, seen), _) =>
             val newHead = moveOneStep(head, direction)
-            val newTail = go(newHead, tail)
-            (newHead, newTail, seen + newTail.last)
+            val newTail = go(newHead, tail.reverse)
+            (newHead, newTail, seen + newTail.head)
           }
         }
         seen.size
